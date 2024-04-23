@@ -28,14 +28,14 @@
     <td>2</td>
     <td>Hồ Thúy Nga</td>
     <td>22520926</td>
-    <td><a href="https://github.com/thuyngak4" title="thuyngak4">22520926</a></td>
+    <td><a href="https://github.com/thuyngak4" title="thuyngak4">thuyngak4</a></td>
     <td><a>22520926@gm.uit.edu.vn</a></td>
   </tr>
   <tr>
     <td>2</td>
     <td>Hồ Thị Thanh Tuyền</td>
     <td>22521627</td>
-    <td><a href="https://github.com/thanhtuyen0000000000000" title="thanhtuyen0000000000000">22521627</a></td>
+    <td><a href="https://github.com/thanhtuyen0000000000000" title="thanhtuyen0000000000000">thanhtuyen0000000000000</a></td>
     <td><a>22521627@gm.uit.edu.vn</a></td>
   </tr>
 </table>
