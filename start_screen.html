@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang = "en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width,initial-scale=2">
+    <title>3D Model Loader</title>
+    
+</head>
+
+<body>
+  
+    
+    <canvas class="webgl">
+      <button type="button" onclick="true">
+        <img src="./Untitled.png" alt="buttonpng" height="160px" width="400px">
+        <a href=""></a>
+    </button>   
+    </canvas>
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.121.1/build/three.module.js",
+            "jsm/": "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/"
+          }
+        }
+      </script>
+    
+    <script type="module" src="./game.js"></script>
+    
+</body>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+  }
+  button{
+            display: flex;
+            cursor: pointer;
+            border: none;
+            appearance: none;
+            background-color: inherit;
+            position: relative;
+            left: 570px;
+            top: 550px;
+            justify-content: center;
+        }
+        button:hover {
+            transform: rotate(360deg);
+        }
+</style> 
+
+</html>
