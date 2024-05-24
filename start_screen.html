@@ -10,45 +10,107 @@
 </head>
 
 <body>
-  
-    
-    <canvas class="webgl">
-      <button type="button" onclick="true">
-        <img src="./Untitled.png" alt="buttonpng" height="160px" width="400px">
-        <a href=""></a>
-    </button>   
-    </canvas>
-    <script type="importmap">
+
+  <div class="background-container">
+  <button class="button01">
+    <img src="start-03.png"alt="buttonpng" height="140px" width="140px">
+  </button>    
+  <button class="button02">
+    <img src="menu-03.png" alt="buttonpng" height="130px" width="130px">
+  </button>
+  <button class="button03">
+    <img src="music-03.png" alt="buttonpng"height="140px" width="140px">
+  </button>  
+  </div>
+  <canvas id="board"></canvas>   
+  <script type="importmap">
         {
           "imports": {
             "three": "https://cdn.jsdelivr.net/npm/three@0.121.1/build/three.module.js",
             "jsm/": "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/"
           }
         }
-      </script>
+  </script>
     
-    <script type="module" src="./game.js"></script>
-    
+  <script type="module" src="./game.js"></script>
+
 </body>
 <style>
-  * {
+  *{
     margin: 0;
     padding: 0;
+    overflow: hidden;
   }
-  button{
+  .background-container {
+    background-image: url('background-01.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    
+    height: 100vh;
+    
+}
+  .button02{
             display: flex;
             cursor: pointer;
             border: none;
             appearance: none;
             background-color: inherit;
             position: relative;
-            left: 570px;
-            top: 550px;
+            left: 490px;
+            top: 335px;
             justify-content: center;
         }
-        button:hover {
+        button02:hover {
             transform: rotate(360deg);
         }
-</style> 
+  .button01{
+            display: flex;
+            cursor: pointer;
+            border: none;
+            appearance: none;
+            background-color: inherit;
+            position: relative;
+            left: 695px;
+            top: 450px;
+            justify-content: center;
+        }
+        button01:hover {
+            transform: rotate(360deg);
+        }
+
+  .button03{
+            display: flex;
+            cursor: pointer;
+            border: none;
+            appearance: none;
+            background-color: inherit;
+            position: relative;
+            left: 910px;
+            top: 200px;
+            justify-content: center;
+        }
+        button03:hover {
+            transform: rotate(360deg);
+        }
+        .background-container {
+         position: relative; /* Enable positioning for the overlay */
+        }
+
+       .overlay {
+    position: absolute; /* Position the overlay on top */
+    top: 0;
+    left: 0;
+    width: 100%; /* Match container width */
+    height: 100%; /* Match container height */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+    opacity: 1; /* Initially visible */
+    transition: opacity 0.5s ease-in-out; /* Smooth transition */
+}
+
+   .background-container.hidden .overlay {
+    opacity: 0; /* Hide overlay on container hidden class */
+    display: none;
+   }
+</style>
 
 </html>
