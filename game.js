@@ -6,11 +6,12 @@ import { DRACOLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples
 
 document.addEventListener('DOMContentLoaded', async function () {
   const world = new CANNON.World(); // Create a Cannon.js world
-  let landSet = [], ghost, vatpham = [], movementSpeed = 0.03, flag = 1, isJumping = false;
+  let landSet = [], ghosts=[], vatpham = [], movementSpeed = 0.03, flag = 1, isJumping = false;
 
   async function start_game() {
     landSet = await land_random(scene);
-    ghost = await load_ghost(scene);
+    let inghost = await load_ghost(scene,-2.0, -0.82, -0.2);
+    ghosts.push(inghost);
     vatpham = await load_vatpham(scene);
 
     function update() {
@@ -91,19 +92,19 @@ document.addEventListener('DOMContentLoaded', async function () {
     return items;
   }
 //load_ghost
-  async function load_ghost(scene) {
+  async function load_ghost(scene,x,y,z) {
     const loader = new GLTFLoader();
     const gltf = await loader.loadAsync('./model_3d/ghost1.glb');
     const ghost = gltf.scene;
     ghost.scale.set(0.15, 0.2, 0.15);
-    ghost.position.set(-2.0, -0.82, -0.2);
+    ghost.position.set(x,y,z);
     ghost.rotation.y = Math.PI / 2 - 0.2;
     scene.add(ghost);
 
     var ghostShape = new CANNON.Box(new CANNON.Vec3(0.15, 0.2, 0.15));
     var ghostBody = new CANNON.Body({ mass: 1 });
     ghostBody.addShape(ghostShape);
-    ghostBody.position.set(-2.0, -0.82, -0.2);
+    ghostBody.position.set(x,y,z);
     ghostBody.addEventListener('collide', function (event) {
       console.log("Ghost collided with:", event.body);
     });
@@ -130,7 +131,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
   }
 //chuyển động ma
-  function animation_ghost(maxheight, speed) {
+  function animation_ghost(ghost,maxheight, speed) {
     if (!ghost || !ghost.object || !ghost.body) return;
     if (flag == 1) {
       if (ghost.object.position.y < maxheight) {
@@ -167,18 +168,30 @@ document.addEventListener('DOMContentLoaded', async function () {
   }
 
 // kiểm tra va chạm
- function checkCollision() {
-  if (ghost && ghost.body && vatpham) {
-    const ghostBox = new THREE.Box3().setFromObject(ghost.object);
-    for (let i = 0; i < vatpham.length; i++) {
-      const item = vatpham[i];
-      const itemBox = new THREE.Box3().setFromObject(item.object);
-      if (ghostBox.intersectsBox(itemBox) && item.name=="donut") {
-        console.log('Collision detected:', item);
-        scene.remove(item.object);
-        world.remove(item.body);
-        vatpham.splice(i, 1);
-        i--;
+function checkCollision() {
+  if (ghosts && vatpham) {
+    for (let i = 0; i < ghosts.length; i++) {
+      const ghost = ghosts[i];
+      const ghostBox = new THREE.Box3().setFromObject(ghost.object);
+      for (let j = 0; j < vatpham.length; j++) {
+        const item = vatpham[j];
+        const itemBox = new THREE.Box3().setFromObject(item.object);
+        if (ghostBox.intersectsBox(itemBox) && item.name == "donut") {
+          console.log('Collision detected:', item);
+          scene.remove(item.object);
+          world.remove(item.body);
+          vatpham.splice(j, 1);
+          j--;
+          
+          const newGhostPositionX = -2.0 - (ghosts.length * 0.3);
+          const newGhostPositionY = -0.82;
+          const newGhostPositionZ = -0.2;
+
+          // Add new ghost
+          load_ghost(scene,newGhostPositionX,newGhostPositionY,newGhostPositionZ).then(newGhost => {
+            ghosts.push(newGhost);
+          });
+        }
       }
     }
   }
@@ -192,8 +205,11 @@ document.addEventListener('DOMContentLoaded', async function () {
         flag = 1;
       }
     });
-    if (isJumping) animation_ghost(0.3, 0.03);
-    if (!isJumping) animation_ghost(-0.75, 0.005);
+    if (isJumping) {
+      ghosts.forEach(ghost => animation_ghost(ghost, 0.3, 0.03));
+    } else {
+      ghosts.forEach(ghost => animation_ghost(ghost, -0.75, 0.005));
+    }
   }
 
   const scene = new THREE.Scene();
