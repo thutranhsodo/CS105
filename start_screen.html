@@ -22,7 +22,8 @@
     <img src="music-03.png" alt="buttonpng"height="140px" width="140px">
   </button>  
   </div>
-  <canvas id="board"></canvas>   
+  <canvas id="board"></canvas> 
+  <div id="score">0</div>  
   <script type="importmap">
         {
           "imports": {
@@ -31,7 +32,7 @@
           }
         }
   </script>
-    
+  <script src="./node_modules/cannon/build/cannon.js"></script>
   <script type="module" src="./game.js"></script>
 
 </body>
@@ -111,6 +112,14 @@
     opacity: 0; /* Hide overlay on container hidden class */
     display: none;
    }
+   .score {
+  position: absolute;
+  color: white;
+  font-size: 3em;
+  font-weight: bold;
+  top: 30px;
+  right: 30px;
+}
 </style>
 
 </html>
