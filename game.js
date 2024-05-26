@@ -15,10 +15,12 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     function update() {
       world.step(1 / 60); // Step the physics world
+     // vatpham.forEach(item => syncObjectWithBody(item.object, item.body));
+  //syncObjectWithBody(ghost.object, ghost.body);
       renderer.render(scene, camera);
       animation_land();
       animation_vatpham();
-      
+      checkCollision();
       oneJump();
       //check();
       controls.update();
@@ -27,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     
     update();
   }
-
+//load_land
   async function load_land(scene, model_scale_x, model_position_x) {
     const loader = new GLTFLoader();
     const gltf = await loader.loadAsync('./model_3d/land.glb');
@@ -43,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     world.addBody(landBody);
     return { object: land, body: landBody };
   }
-
+//load_donut lẻ
   async function load_bomb(scene, x, y, z) {
     const loader = new GLTFLoader();
     const gltf = await loader.loadAsync('./model_3d/donut_1.glb');
@@ -58,9 +60,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     donutBody.position.set(x, y, z);
 
     world.addBody(donutBody);
-    return { object: donut, body: donutBody };
+    return { object: donut, body: donutBody, name:"donut" };
   }
-
+//load land_random
   async function land_random(scene) {
     let model_position_x = 7.5;
     let land_set = [];
@@ -78,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
     return land_set;
   }
-
+//load 1 loạt vật phẩm
   async function load_vatpham(scene) {
     let items = [];
     for (let i = 0; i < landSet.length; i++) {
@@ -88,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
     return items;
   }
-
+//load_ghost
   async function load_ghost(scene) {
     const loader = new GLTFLoader();
     const gltf = await loader.loadAsync('./model_3d/ghost1.glb');
@@ -109,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     world.addBody(ghostBody);
     return { object: ghost, body: ghostBody };
   }
-
+//chuyển động 1 landSet
   function animation_land() {
     for (let i = 0; i < landSet.length; i++) {
       if (landSet[i] && landSet[i].object && landSet[i].body) {
@@ -118,17 +120,16 @@ document.addEventListener('DOMContentLoaded', async function () {
       }
     }
   }
-
+//chuyển động vatphamSet
   function animation_vatpham() {
     for (let i = 0; i < vatpham.length; i++) {
       if (vatpham[i] && vatpham[i].object && vatpham[i].body) {
         vatpham[i].object.position.x -= movementSpeed;
         vatpham[i].body.position.x -= movementSpeed;
       }
-      else{vatpham.splice(i,1);i--;}
     }
   }
-
+//chuyển động ma
   function animation_ghost(maxheight, speed) {
     if (!ghost || !ghost.object || !ghost.body) return;
     if (flag == 1) {
@@ -164,29 +165,26 @@ document.addEventListener('DOMContentLoaded', async function () {
       }
     }*/
   }
-  function check() {
-    if (ghost && ghost.body && vatpham) {
-      for (let i = 0; i < vatpham.length; i++) {
-        if (vatpham[i] && vatpham[i].body) {
-          vatpham[i].body.addEventListener('collide', function(event) {
-            if (event.body === ghost.body) {
-              console.log('Collision detected:', vatpham[i]);
-              if (vatpham[i] && vatpham[i].object && vatpham[i].body) {
-                // Remove donut from scene when it collides with ghost
-                //scene.remove(vatpham[i].object);
-                // Remove donut from Cannon.js world
-                //world.remove(vatpham[i].body);
-                //vatpham.splice(i, 1); // Remove from vatpham array
-                //i--; // Adjust index after removal
-                
-              }
-            }
-            
-          });
-        }
+
+// kiểm tra va chạm
+ function checkCollision() {
+  if (ghost && ghost.body && vatpham) {
+    const ghostBox = new THREE.Box3().setFromObject(ghost.object);
+    for (let i = 0; i < vatpham.length; i++) {
+      const item = vatpham[i];
+      const itemBox = new THREE.Box3().setFromObject(item.object);
+      if (ghostBox.intersectsBox(itemBox) && item.name=="donut") {
+        console.log('Collision detected:', item);
+        scene.remove(item.object);
+        world.remove(item.body);
+        vatpham.splice(i, 1);
+        i--;
       }
     }
   }
+}
+  console.log(world)
+// ma nhảy  
   function oneJump() {
     document.addEventListener('keydown', function (event) {
       if (event.keyCode === 32 && !isJumping) {
