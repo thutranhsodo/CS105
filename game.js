@@ -6,13 +6,14 @@ import { DRACOLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples
 import { process_score } from './process_score.js';
 import { updateGhostCountDisplay } from './quantity_ghost.js';
 import { quantity_ghost } from './quantity_ghost.js';
+import * as land_ from './land.js';
 
 document.addEventListener('DOMContentLoaded', async function () {
 
-  let landSet = [], ghosts = [], oldghosts = [], vatpham = [], movementSpeed = 0.03, flag = 1, disappearTime, ghostspecialActive = false;
+  let landSet = [], ghosts = [], oldghosts = [], vatpham = [], movementSpeed = 0.03, flag = 1, disappearTime, ghostspecialActive = false, speed_j=0.06;
 
   async function start_game() {
-    landSet = await land_random(scene);
+    landSet = await land_.land_random(scene,-2)
     let inghost = await load_ghost(scene, -2.0, -0.82, -0.2);
     ghosts.push(inghost);
     scene.add(inghost);
@@ -23,13 +24,23 @@ document.addEventListener('DOMContentLoaded', async function () {
     
     vatpham = await load_vatpham(scene);
 
-    function update() {
+    async function update() {
  
       renderer.render(scene, camera);
-      animation_land();
+      if (landSet[landSet.length-1].position.x<8.5)
+        {
+          let land_tam =await land_.land_random(scene, landSet[landSet.length-1].position.x + landSet[landSet.length-1].scale.x/2+5)
+          for (let i = 0; i < land_tam.length; i++) 
+            landSet.push(land_tam[i]);
+        }
+      if(landSet[0].position.x+landSet[0].scale.x/2<-6) 
+        scene.remove(landSet.shift());
+      land_.animation_land(landSet, movementSpeed);
       animation_vatpham();
       checkCollision();
+      ghost_fall();
       oneJump();
+      
       //check();
       controls.update();
       requestAnimationFrame(update);
@@ -37,24 +48,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     update();
   }
-  //load_land
-  async function load_land(scene, model_scale_x, model_position_x) {
-    const loader = new GLTFLoader();
-    const gltf = await loader.loadAsync('./model_3d/land.glb');
-    const land = gltf.scene;
-    land.scale.set(model_scale_x, 1, 1);
-    land.position.set(model_position_x, -1.6, 0);
-
-    land.traverse(function (child) {
-      if (child.isMesh) {
-        child.receiveShadow = true;
-        child.castShadow = true;  // Enable shadow casting
-      }
-  });
-    land.receiveShadow=true;
-    
-    return land;
-  }
+  
   //load_donut lẻ
   async function load_bomb(scene, x, y, z) {
     const loader = new GLTFLoader();
@@ -91,24 +85,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     donut.receiveShadow = true;
     
     return { object: donut, name: "donut_special" };
-  }
-  //load land_random
-  async function land_random(scene) {
-    let model_position_x = 7.5;
-    let land_set = [];
-
-    let initialLand = await load_land(scene, 10, 1);
-    land_set.push(initialLand);
-    scene.add(initialLand);
-
-    for (let i = 0; i < 8; i++) {
-      const model_scale_x = Math.random() * (5 - 1) + 1;
-      let land = await load_land(scene, model_scale_x, model_position_x);
-      land_set.push(land);
-      scene.add(land);
-      model_position_x += model_scale_x + Math.random() * (3 - 1) + 1.5;
-    }
-    return land_set;
   }
   //load 1 loạt vật phẩm
   async function load_vatpham(scene) {
@@ -148,14 +124,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     return ghost;
   }
   //chuyển động 1 landSet
-  function animation_land() {
-    for (let i = 0; i < landSet.length; i++) {
-      if (landSet[i] ) {
-        landSet[i].position.x -= movementSpeed;
-        
-      }
-    }
-  }
   //chuyển động vatphamSet
   function animation_vatpham() {
     for (let i = 0; i < vatpham.length; i++) {
@@ -186,11 +154,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     //đáp xuống tiếp tục chuyển động
     if (flag == 2) {
       if (ghost.position.y > -0.84) {
-        ghost.position.y -= (speed + 0.001);
+        ghost.position.y -= speed;
      
       } else {
         flag = 1;
         isJumping = false;
+        speed_j=0.06;
       }
     }
   }
@@ -368,10 +337,57 @@ document.addEventListener('DOMContentLoaded', async function () {
       }
     });
     for (let i = 0; i < ghosts.length; i++) {
-      if (isJumping) animation_ghost(ghosts[i], 0.8, 0.03);
-      if (!isJumping) animation_ghost(ghosts[i], -0.75, 0.005)
+      if (isJumping)
+          {
+            animation_ghost(ghosts[i],0.5, speed_j)
+            if (flag==1) speed_j=Math.max(0.025, speed_j-0.003)
+            else speed_j+=0.0002
+          }
+      if (!isJumping) animation_ghost(ghosts[i],-0.75, 0.005);
+  }
+  }
+
+  function fall(ghost) {
+    // Fixed initial velocity and gravity
+    const fixedTime = 2;
+
+    function animate() {
+      let elapsedTime = (Date.now() - startTime) / 1000;
+      if (elapsedTime > fixedTime) elapsedTime = fixedTime;
+
+      ghost.position.y = ghost.position.y + 0.1*elapsedTime + 0.1 * (-9.81) * elapsedTime * elapsedTime;
+
+      if (ghost.position.y < -10) {
+        removeGhost(ghost);
+      } else {
+        requestAnimationFrame(animate);
+      }
     }
 
+    let startTime = Date.now();
+    requestAnimationFrame(animate);
+  }
+
+  function is_out_of_land(ghost)
+  {
+    const ghost_left = ghost.position.x - ghost.scale.x/2;
+    const ghost_right = ghost.position.x + ghost.scale.x/2;
+    const ghost_down = ghost.position.y - ghost.scale.y/2;
+    const land0_right = landSet[0].position.x +landSet[0].scale.x/2;
+    const land1_left = landSet[1].position.x-landSet[1].scale.x/2;
+    if (ghost_left>land0_right && ghost_right<land1_left && ghost_down <-0.85)
+      return true;
+    return false;
+  }
+  function ghost_fall()
+  {
+    for (let i=0; i<ghosts.length; i++)
+      {
+        if (!is_out_of_land(ghosts[i])) continue;
+        fall(ghosts[i])
+      }
+      
+    
   }
 
   const scene = new THREE.Scene();
