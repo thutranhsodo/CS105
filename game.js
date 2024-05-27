@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js";
 import { DRACOLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/DRACOLoader.js";
+import { process_score } from './process_score.js';
 //import * as CANNON from "cannon";
 
 document.addEventListener('DOMContentLoaded', async function () {
@@ -39,6 +40,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     const land = gltf.scene;
     land.scale.set(model_scale_x, 1, 1);
     land.position.set(model_position_x, -1.6, 0);
+
+    land.receiveShadow = true; // Kích hoạt nhận bóng cho mặt đất
 
     var landShape = new CANNON.Box(new CANNON.Vec3(model_scale_x, 1, 1));
     var landBody = new CANNON.Body({ mass: 0 });
@@ -102,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     ghost.position.set(x, y, z);
     ghost.rotation.y = Math.PI / 2 - 0.2;
     scene.add(ghost);
-
+    ghost.castShadow = true;
     var ghostShape = new CANNON.Box(new CANNON.Vec3(0.15, 0.2, 0.15));
     var ghostBody = new CANNON.Body({ mass: 1 });
     ghostBody.addShape(ghostShape);
@@ -352,6 +355,31 @@ function removeGhost(ghost) {
     height: window.innerHeight,
   };
 
+  function getSphere(size){
+    var sphere = new THREE.SphereGeometry(size, 24, 24);
+    var material = new THREE.MeshBasicMaterial({
+        color: 0xFDC554,
+        wireframe: false
+    });
+    var sphere = new THREE.Mesh(sphere, material);
+    sphere.castShadow = true;
+    return sphere;
+  }
+  var sphere = getSphere(0.3);
+  sphere.position.x = 2;
+  sphere.position.y = 1.5;
+  sphere.position.z = -2;
+  scene.add(sphere);
+
+  function getDirectionalLight(intensity) {
+    var light = new THREE.DirectionalLight(0xFDC554, intensity);
+    light.castShadow = true;
+    return light;
+  }
+  var spotlight = getDirectionalLight(1.5);
+  spotlight.add(sphere);
+  scene.add(spotlight);
+
   const camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 1000);
   camera.position.set(0, 0, 4);
   scene.add(camera);
@@ -378,5 +406,6 @@ function removeGhost(ghost) {
     } catch (error) {
       console.error("Error:", error);
     }
+    process_score();
   });
 });
