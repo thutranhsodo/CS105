@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     landSet = await land_random(scene);
     let inghost = await load_ghost(scene, -2.0, -0.82, -0.2);
     ghosts.push(inghost);
+    let ing = await load_ghost(scene, -2.3, -0.82, -0.2);
+    ghosts.push(ing);
     vatpham = await load_vatpham(scene);
 
     function update() {
@@ -168,6 +170,8 @@ document.addEventListener('DOMContentLoaded', async function () {
       if (ghost.object.position.y < maxheight) {
         ghost.object.position.y += speed;
         ghost.body.position.y += speed;
+        
+        
       } else {
         flag = 2;
       }
@@ -219,108 +223,93 @@ document.addEventListener('DOMContentLoaded', async function () {
   */
   function checkCollision() {
     if (ghosts && vatpham) {
-      for (let i = 0; i < ghosts.length; i++) {
-        const ghost = ghosts[i];
-        const ghostBox = new THREE.Box3().setFromObject(ghost.object);
-        for (let j = 0; j < vatpham.length; j++) {
-          const item = vatpham[j];
-          const itemBox = new THREE.Box3().setFromObject(item.object);
-          let ghostCollided = false;// Flag to track if this ghost collided with a donut
-          if (ghostBox.intersectsBox(itemBox) && item.name != "chan") {
-            console.log('Collision detected:', item);
-            scene.remove(item.object);
-            world.remove(item.body);
-            vatpham.splice(j, 1);
-            j--;
+        for (let i = 0; i < ghosts.length; i++) {
+            const ghost = ghosts[i];
+            if (ghost.isRemoving) continue; // Skip if ghost is being removed
 
-            if (item.name == "donut") {
-              // Thiết lập vận tốc ban đầu cố định
-              const initialVelocity = new THREE.Vector3(1.3, 2, 2); // Vận tốc cố định trên các trục X, Y, Z
+            const ghostBox = new THREE.Box3().setFromObject(ghost.object);
+            for (let j = 0; j < vatpham.length; j++) {
+                const item = vatpham[j];
+                const itemBox = new THREE.Box3().setFromObject(item.object);
+                if (ghostBox.intersectsBox(itemBox) && item.name !== "donut") {
+                    console.log('Collision detected:', item);
+                    scene.remove(item.object);
+                    world.remove(item.body);
+                    vatpham.splice(j, 1);
+                    j--;
 
-              // Gia tốc trọng trường
-              const gravity = new THREE.Vector3(0, -9.81, 0);
+                    //đụng bomb thì ma bị out 
+                    if (item.name === "pumkin") {
+                        // Flag the ghost for removal
+                        ghost.isRemoving = true;
+                        animateGhostRemoval(ghost);
+                        i--; // Adjust index to account for removal
+                        break;
+                    }
 
-              // Đặt thời gian cố định để con ma bay ra
-              const fixedTime = 2; // Giá trị cố định cho thời gian trôi qua (giây)
+                    //đụng vật phẩm thì ma tăng thêm
+                    if (item.name ==="donut" ) {
+                        const newGhostPositionX = -2.0 - (ghosts.length * 0.3);
+                        const newGhostPositionY = -0.82;
+                        const newGhostPositionZ = -0.2;
 
-              const initialPosition = ghost.object.position.clone();
-
-              function animate() {
-                let elapsedTime = (Date.now() - startTime) / 1000; // Tính thời gian đã trôi qua bằng giây
-
-                // Giới hạn thời gian đã trôi qua để con ma bay theo hình parabol trong một khoảng thời gian cố định
-                if (elapsedTime > fixedTime) {
-                  elapsedTime = fixedTime;
+                        // Add new ghost
+                        load_ghost(scene, newGhostPositionX, newGhostPositionY, newGhostPositionZ).then(newGhost => {
+                            ghosts.push(newGhost);
+                        });
+                    }
                 }
 
-                // Tính toán vị trí mới theo công thức của chuyển động parabol
-                ghost.object.position.x = initialPosition.x + initialVelocity.x * elapsedTime;
-                ghost.object.position.y = initialPosition.y + initialVelocity.y * elapsedTime + 0.5 * gravity.y * elapsedTime * elapsedTime;
-                ghost.object.position.z = initialPosition.z + initialVelocity.z * elapsedTime;
-
-                // Thêm hiệu ứng xoay
-                ghost.object.rotation.x += 0.1;
-                ghost.object.rotation.y += 0.1;
-
-                // Kiểm tra nếu con ma đã rơi xuống dưới một giá trị nhất định thì xóa nó
-                if (ghost.object.position.y < -10) {
-                  scene.remove(ghost.object);
-                  if (ghost.body) {
-                    world.remove(ghost.body);
-                  }
-                  ghosts.splice(i, 1);
-                  return;
+                //ma bị chặn lại
+                if (ghostBox.intersectsBox(itemBox) && item.name === "donut") {
+                    if (!ghost.isFrozen) {
+                        ghost.isFrozen = true;
+                        setTimeout(() => {
+                            removeGhost(ghost);
+                        }, 3000);
+                    }
                 }
-
-                requestAnimationFrame(animate);
-              }
-
-              // Thiết lập thời gian bắt đầu và khởi động animate
-              let startTime = Date.now();
-              requestAnimationFrame(animate);
-
-              // Điều chỉnh chỉ số để tiếp tục vòng lặp chính xác
-              i--;
-            }
-            if (item.name == " pumkin") {
-              const newGhostPositionX = -2.0 - (ghosts.length * 0.3);
-              const newGhostPositionY = -0.82;
-              const newGhostPositionZ = -0.2;
-
-              // Add new ghost
-              load_ghost(scene, newGhostPositionX, newGhostPositionY, newGhostPositionZ).then(newGhost => {
-                ghosts.push(newGhost);
-              });
-            }
-
-            //if(item.name ==" big_ghost")
-             // {
-
-            //  }
-          }
-
-          if(ghostBox.intersectsBox(itemBox) && item.name === "chan")
-            {
-             ghostCollided = true;
-            if (!ghost.isFrozen) {
-              ghost.isFrozen = true; // Freeze the ghost
-              setTimeout(() => {
-                removeGhost(ghost); // Remove the ghost after 3 seconds
-              }, 3000);
-            }
-              
             }
         }
-      }
     }
-  }
-  function removeGhost(ghost) {
+}
+
+function animateGhostRemoval(ghost) {
+    // Fixed initial velocity and gravity
+    const initialVelocity = new THREE.Vector3(1.3, 2, 2);
+    const gravity = new THREE.Vector3(0, -9.81, 0);
+    const fixedTime = 2;
+    const initialPosition = ghost.object.position.clone();
+
+    function animate() {
+        let elapsedTime = (Date.now() - startTime) / 1000;
+        if (elapsedTime > fixedTime) elapsedTime = fixedTime;
+
+        ghost.object.position.x = initialPosition.x + initialVelocity.x * elapsedTime;
+        ghost.object.position.y = initialPosition.y + initialVelocity.y * elapsedTime + 0.5 * gravity.y * elapsedTime * elapsedTime;
+        ghost.object.position.z = initialPosition.z + initialVelocity.z * elapsedTime;
+
+        ghost.object.rotation.x += 0.1;
+        ghost.object.rotation.y += 0.1;
+
+        if (ghost.object.position.y < -10) {
+            removeGhost(ghost);
+        } else {
+            requestAnimationFrame(animate);
+        }
+    }
+
+    let startTime = Date.now();
+    requestAnimationFrame(animate);
+}
+
+function removeGhost(ghost) {
     scene.remove(ghost.object);
-    if (ghost.body) {
-      world.remove(ghost.body);
-    }
-    ghosts.splice(ghosts.indexOf(ghost), 1);
-  }
+    if (ghost.body) world.remove(ghost.body);
+    const index = ghosts.indexOf(ghost);
+    if (index > -1) ghosts.splice(index, 1);
+}
+
   console.log(world)
   // ma nhảy  
   function oneJump() {
