@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js";
 import { DRACOLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/DRACOLoader.js";
-import { process_score } from './process_score.js';
 //import * as CANNON from "cannon";
 
 document.addEventListener('DOMContentLoaded', async function () {
@@ -231,15 +230,16 @@ document.addEventListener('DOMContentLoaded', async function () {
             for (let j = 0; j < vatpham.length; j++) {
                 const item = vatpham[j];
                 const itemBox = new THREE.Box3().setFromObject(item.object);
-                if (ghostBox.intersectsBox(itemBox) && item.name !== "donut") {
+                if (ghostBox.intersectsBox(itemBox) && item.name !== "chan") {
                     console.log('Collision detected:', item);
+                    //vật phẩm biến mất
                     scene.remove(item.object);
                     world.remove(item.body);
                     vatpham.splice(j, 1);
                     j--;
 
                     //đụng bomb thì ma bị out 
-                    if (item.name === "pumkin") {
+                    if (item.name === "donut") {
                         // Flag the ghost for removal
                         ghost.isRemoving = true;
                         animateGhostRemoval(ghost);
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     }
 
                     //đụng vật phẩm thì ma tăng thêm
-                    if (item.name ==="donut" ) {
+                    if (item.name ==="donu" ) {
                         const newGhostPositionX = -2.0 - (ghosts.length * 0.3);
                         const newGhostPositionY = -0.82;
                         const newGhostPositionZ = -0.2;
@@ -258,6 +258,10 @@ document.addEventListener('DOMContentLoaded', async function () {
                             ghosts.push(newGhost);
                         });
                     }
+                    //if(item.name == "donut")
+                     // {
+
+                     // }
                 }
 
                 //ma bị chặn lại
@@ -374,6 +378,5 @@ function removeGhost(ghost) {
     } catch (error) {
       console.error("Error:", error);
     }
-    process_score();
   });
 });
