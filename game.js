@@ -187,6 +187,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (flag == 2) {
       if (ghost.position.y > -0.84) {
         ghost.position.y -= (speed + 0.001);
+     
       } else {
         flag = 1;
         isJumping = false;
@@ -407,7 +408,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     return sphere;
 }
   var sphere = getSphere(0.3);
-  sphere.position.x = 2;
+  sphere.position.x = 2.5;
   sphere.position.y = 1.5;
   sphere.position.z = -2;
   scene.add(sphere);
@@ -426,6 +427,10 @@ document.addEventListener('DOMContentLoaded', async function () {
   light.shadow.camera.fov = 30; // Adjust field of view for spot light
   scene.add(light)
 
+    light.shadow.camera.near = 0.1; // Adjust near plane
+    light.shadow.camera.far = 25; // Adjust far plane
+    light.shadow.camera.fov = 30; // Adjust field of view for spot light
+    scene.add(light)
   const camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 1000);
   camera.position.set(0, 0, 4);
   scene.add(camera);
