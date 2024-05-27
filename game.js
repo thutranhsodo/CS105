@@ -6,18 +6,18 @@ import { DRACOLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples
 
 document.addEventListener('DOMContentLoaded', async function () {
   const world = new CANNON.World(); // Create a Cannon.js world
-  let landSet = [], ghosts=[], vatpham = [], movementSpeed = 0.03, flag = 1, isJumping = false;
+  let landSet = [], ghosts = [], vatpham = [], movementSpeed = 0.03, flag = 1,disappearTime;
 
   async function start_game() {
     landSet = await land_random(scene);
-    let inghost = await load_ghost(scene,-2.0, -0.82, -0.2);
+    let inghost = await load_ghost(scene, -2.0, -0.82, -0.2);
     ghosts.push(inghost);
     vatpham = await load_vatpham(scene);
 
     function update() {
       world.step(1 / 60); // Step the physics world
-     // vatpham.forEach(item => syncObjectWithBody(item.object, item.body));
-  //syncObjectWithBody(ghost.object, ghost.body);
+      // vatpham.forEach(item => syncObjectWithBody(item.object, item.body));
+      //syncObjectWithBody(ghost.object, ghost.body);
       renderer.render(scene, camera);
       animation_land();
       animation_vatpham();
@@ -27,10 +27,10 @@ document.addEventListener('DOMContentLoaded', async function () {
       controls.update();
       requestAnimationFrame(update);
     }
-    
+
     update();
   }
-//load_land
+  //load_land
   async function load_land(scene, model_scale_x, model_position_x) {
     const loader = new GLTFLoader();
     const gltf = await loader.loadAsync('./model_3d/land.glb');
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     world.addBody(landBody);
     return { object: land, body: landBody };
   }
-//load_donut lẻ
+  //load_donut lẻ
   async function load_bomb(scene, x, y, z) {
     const loader = new GLTFLoader();
     const gltf = await loader.loadAsync('./model_3d/donut_1.glb');
@@ -61,9 +61,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     donutBody.position.set(x, y, z);
 
     world.addBody(donutBody);
-    return { object: donut, body: donutBody, name:"donut" };
+    return { object: donut, body: donutBody, name: "donut" };
   }
-//load land_random
+  //load land_random
   async function land_random(scene) {
     let model_position_x = 7.5;
     let land_set = [];
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
     return land_set;
   }
-//load 1 loạt vật phẩm
+  //load 1 loạt vật phẩm
   async function load_vatpham(scene) {
     let items = [];
     for (let i = 0; i < landSet.length; i++) {
@@ -91,20 +91,20 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
     return items;
   }
-//load_ghost
-  async function load_ghost(scene,x,y,z) {
+  //load_ghost
+  async function load_ghost(scene, x, y, z) {
     const loader = new GLTFLoader();
     const gltf = await loader.loadAsync('./model_3d/ghost1.glb');
     const ghost = gltf.scene;
     ghost.scale.set(0.15, 0.2, 0.15);
-    ghost.position.set(x,y,z);
+    ghost.position.set(x, y, z);
     ghost.rotation.y = Math.PI / 2 - 0.2;
     scene.add(ghost);
 
     var ghostShape = new CANNON.Box(new CANNON.Vec3(0.15, 0.2, 0.15));
     var ghostBody = new CANNON.Body({ mass: 1 });
     ghostBody.addShape(ghostShape);
-    ghostBody.position.set(x,y,z);
+    ghostBody.position.set(x, y, z);
     ghostBody.addEventListener('collide', function (event) {
       console.log("Ghost collided with:", event.body);
     });
@@ -112,7 +112,29 @@ document.addEventListener('DOMContentLoaded', async function () {
     world.addBody(ghostBody);
     return { object: ghost, body: ghostBody };
   }
-//chuyển động 1 landSet
+
+  //load ghost_big
+  async function load_ghost_big(scene, x, y, z) {
+    const loader = new GLTFLoader();
+    const gltf = await loader.loadAsync('./model_3d/ghost_big.glb');
+    const ghost = gltf.scene;
+    ghost.scale.set(0.15, 0.2, 0.15);
+    ghost.position.set(x, y, z);
+    ghost.rotation.y = Math.PI / 2 - 0.2;
+    scene.add(ghost);
+
+    var ghostShape = new CANNON.Box(new CANNON.Vec3(0.15, 0.2, 0.15));
+    var ghostBody = new CANNON.Body({ mass: 1 });
+    ghostBody.addShape(ghostShape);
+    ghostBody.position.set(x, y, z);
+    ghostBody.addEventListener('collide', function (event) {
+      console.log("Ghost collided with:", event.body);
+    });
+
+    world.addBody(ghostBody);
+    return { object: ghost, body: ghostBody };
+  }
+  //chuyển động 1 landSet
   function animation_land() {
     for (let i = 0; i < landSet.length; i++) {
       if (landSet[i] && landSet[i].object && landSet[i].body) {
@@ -121,7 +143,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       }
     }
   }
-//chuyển động vatphamSet
+  //chuyển động vatphamSet
   function animation_vatpham() {
     for (let i = 0; i < vatpham.length; i++) {
       if (vatpham[i] && vatpham[i].object && vatpham[i].body) {
@@ -130,9 +152,17 @@ document.addEventListener('DOMContentLoaded', async function () {
       }
     }
   }
-//chuyển động ma
-  function animation_ghost(ghost,maxheight, speed) {
+  let isJumping = false;
+
+  //let ghoststop = false;
+  //chuyển động ma
+  function animation_ghost(ghost, maxheight, speed) {
     if (!ghost || !ghost.object || !ghost.body) return;
+    if (ghost.isFrozen) {
+     ghost.object.position.x -= movementSpeed;
+     ghost.body.position.x -= movementSpeed; // Stop animation if frozen
+    }
+   //nhảy lên 
     if (flag == 1) {
       if (ghost.object.position.y < maxheight) {
         ghost.object.position.y += speed;
@@ -140,7 +170,9 @@ document.addEventListener('DOMContentLoaded', async function () {
       } else {
         flag = 2;
       }
-    } else if (flag == 2) {
+    }
+    //đáp xuống tiếp tục chuyển động
+    if (flag == 2) {
       if (ghost.object.position.y > -0.84) {
         ghost.object.position.y -= (speed + 0.001);
         ghost.body.position.y -= (speed + 0.001);
@@ -149,55 +181,147 @@ document.addEventListener('DOMContentLoaded', async function () {
         isJumping = false;
       }
     }
-    /*if (isJumping && ghost && ghost.object && vatpham) {
-      for (let i = 0; i < vatpham.length; i++) {
-        if (vatpham[i] && vatpham[i].object) {
-          const donut = vatpham[i].object;
-          const ghostX = ghost.object.position.x;
-          const ghostZ = ghost.object.position.z;
-          const donutX = donut.position.x;
-          const donutZ = donut.position.z;
-          const distance = Math.sqrt((ghostX - donutX) ** 2 + (ghostZ - donutZ) ** 2);
-          if (distance < 0.3) { // Nếu ghost ở gần donut, nhảy qua
-            ghost.object.position.y += 0.1; // Tăng độ cao khi nhảy qua donut
-            ghost.body.position.y += 0.1;
-          }
-        }
-      }
-    }*/
+    
+  
   }
 
-// kiểm tra va chạm
-function checkCollision() {
-  if (ghosts && vatpham) {
-    for (let i = 0; i < ghosts.length; i++) {
-      const ghost = ghosts[i];
-      const ghostBox = new THREE.Box3().setFromObject(ghost.object);
-      for (let j = 0; j < vatpham.length; j++) {
-        const item = vatpham[j];
-        const itemBox = new THREE.Box3().setFromObject(item.object);
-        if (ghostBox.intersectsBox(itemBox) && item.name == "donut") {
-          console.log('Collision detected:', item);
-          scene.remove(item.object);
-          world.remove(item.body);
-          vatpham.splice(j, 1);
-          j--;
-          
-          const newGhostPositionX = -2.0 - (ghosts.length * 0.3);
-          const newGhostPositionY = -0.82;
-          const newGhostPositionZ = -0.2;
-
-          // Add new ghost
-          load_ghost(scene,newGhostPositionX,newGhostPositionY,newGhostPositionZ).then(newGhost => {
-            ghosts.push(newGhost);
-          });
+  // kiểm tra va chạm
+  /*function checkCollision() {
+    if (ghosts && vatpham) {
+      for (let i = 0; i < ghosts.length; i++) {
+        const ghost = ghosts[i];
+        const ghostBox = new THREE.Box3().setFromObject(ghost.object);
+        for (let j = 0; j < vatpham.length; j++) {
+          const item = vatpham[j];
+          const itemBox = new THREE.Box3().setFromObject(item.object);
+          if (ghostBox.intersectsBox(itemBox) && item.name == "donut") {
+            console.log('Collision detected:', item);
+            scene.remove(item.object);
+            world.remove(item.body);
+            vatpham.splice(j, 1);
+            j--;
+            
+        
+            //const newGhostPositionX = -2.0 - (ghosts.length * 0.3);
+            //const newGhostPositionY = -0.82;
+            //const newGhostPositionZ = -0.2;
+  
+            // Add new ghost
+            //load_ghost(scene,newGhostPositionX,newGhostPositionY,newGhostPositionZ).then(newGhost => {
+             // ghosts.push(newGhost);
+           // });
+          }
         }
       }
     }
   }
-}
+  */
+  function checkCollision() {
+    if (ghosts && vatpham) {
+      for (let i = 0; i < ghosts.length; i++) {
+        const ghost = ghosts[i];
+        const ghostBox = new THREE.Box3().setFromObject(ghost.object);
+        for (let j = 0; j < vatpham.length; j++) {
+          const item = vatpham[j];
+          const itemBox = new THREE.Box3().setFromObject(item.object);
+          let ghostCollided = false;// Flag to track if this ghost collided with a donut
+          if (ghostBox.intersectsBox(itemBox) && item.name != "chan") {
+            console.log('Collision detected:', item);
+            scene.remove(item.object);
+            world.remove(item.body);
+            vatpham.splice(j, 1);
+            j--;
+
+            if (item.name == "donut") {
+              // Thiết lập vận tốc ban đầu cố định
+              const initialVelocity = new THREE.Vector3(1.3, 2, 2); // Vận tốc cố định trên các trục X, Y, Z
+
+              // Gia tốc trọng trường
+              const gravity = new THREE.Vector3(0, -9.81, 0);
+
+              // Đặt thời gian cố định để con ma bay ra
+              const fixedTime = 2; // Giá trị cố định cho thời gian trôi qua (giây)
+
+              const initialPosition = ghost.object.position.clone();
+
+              function animate() {
+                let elapsedTime = (Date.now() - startTime) / 1000; // Tính thời gian đã trôi qua bằng giây
+
+                // Giới hạn thời gian đã trôi qua để con ma bay theo hình parabol trong một khoảng thời gian cố định
+                if (elapsedTime > fixedTime) {
+                  elapsedTime = fixedTime;
+                }
+
+                // Tính toán vị trí mới theo công thức của chuyển động parabol
+                ghost.object.position.x = initialPosition.x + initialVelocity.x * elapsedTime;
+                ghost.object.position.y = initialPosition.y + initialVelocity.y * elapsedTime + 0.5 * gravity.y * elapsedTime * elapsedTime;
+                ghost.object.position.z = initialPosition.z + initialVelocity.z * elapsedTime;
+
+                // Thêm hiệu ứng xoay
+                ghost.object.rotation.x += 0.1;
+                ghost.object.rotation.y += 0.1;
+
+                // Kiểm tra nếu con ma đã rơi xuống dưới một giá trị nhất định thì xóa nó
+                if (ghost.object.position.y < -10) {
+                  scene.remove(ghost.object);
+                  if (ghost.body) {
+                    world.remove(ghost.body);
+                  }
+                  ghosts.splice(i, 1);
+                  return;
+                }
+
+                requestAnimationFrame(animate);
+              }
+
+              // Thiết lập thời gian bắt đầu và khởi động animate
+              let startTime = Date.now();
+              requestAnimationFrame(animate);
+
+              // Điều chỉnh chỉ số để tiếp tục vòng lặp chính xác
+              i--;
+            }
+            if (item.name == " pumkin") {
+              const newGhostPositionX = -2.0 - (ghosts.length * 0.3);
+              const newGhostPositionY = -0.82;
+              const newGhostPositionZ = -0.2;
+
+              // Add new ghost
+              load_ghost(scene, newGhostPositionX, newGhostPositionY, newGhostPositionZ).then(newGhost => {
+                ghosts.push(newGhost);
+              });
+            }
+
+            //if(item.name ==" big_ghost")
+             // {
+
+            //  }
+          }
+
+          if(ghostBox.intersectsBox(itemBox) && item.name === "chan")
+            {
+             ghostCollided = true;
+            if (!ghost.isFrozen) {
+              ghost.isFrozen = true; // Freeze the ghost
+              setTimeout(() => {
+                removeGhost(ghost); // Remove the ghost after 3 seconds
+              }, 3000);
+            }
+              
+            }
+        }
+      }
+    }
+  }
+  function removeGhost(ghost) {
+    scene.remove(ghost.object);
+    if (ghost.body) {
+      world.remove(ghost.body);
+    }
+    ghosts.splice(ghosts.indexOf(ghost), 1);
+  }
   console.log(world)
-// ma nhảy  
+  // ma nhảy  
   function oneJump() {
     document.addEventListener('keydown', function (event) {
       if (event.keyCode === 32 && !isJumping) {
@@ -205,11 +329,11 @@ function checkCollision() {
         flag = 1;
       }
     });
-    if (isJumping) {
-      ghosts.forEach(ghost => animation_ghost(ghost, 0.3, 0.03));
-    } else {
-      ghosts.forEach(ghost => animation_ghost(ghost, -0.75, 0.005));
+    for (let i = 0; i < ghosts.length; i++) {
+      if (isJumping) animation_ghost(ghosts[i], 0.3, 0.03);
+      if (!isJumping) animation_ghost(ghosts[i], -0.75, 0.005)
     }
+
   }
 
   const scene = new THREE.Scene();
