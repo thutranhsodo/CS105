@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js";
 import { DRACOLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/DRACOLoader.js";
+import { process_score } from './process_score.js';
 //import * as CANNON from "cannon";
 
 document.addEventListener('DOMContentLoaded', async function () {
@@ -384,5 +385,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     } catch (error) {
       console.error("Error:", error);
     }
+    process_score();
   });
 });
