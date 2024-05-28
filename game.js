@@ -86,6 +86,52 @@ document.addEventListener('DOMContentLoaded', async function () {
     
     return { object: donut, name: "donut_special" };
   }
+  //load_Bomb
+  function load_Bomb(scene, x, y, z)
+  {
+    function getBomb(size) {
+      var sphereGeometry = new THREE.SphereGeometry(size, 24, 24);
+      var loader = new THREE.TextureLoader();
+      var texture = loader.load('/model_3d/Bomb.jpg');
+      var material = new THREE.MeshBasicMaterial({ map: texture });
+      var sphere = new THREE.Mesh(sphereGeometry, material);
+      sphere.castShadow = true;
+      return sphere;
+    }
+    var bomb = getBomb(0.2);
+    bomb.position.set(x, y, z);
+    bomb.rotation.x = 2 - Math.PI / 5;
+
+    return {object: bomb, name: "bomb"};
+  }
+  //load vật cản
+  function load_barrier(scene, x, y, z)
+  {
+    function getBox(w, h, d){
+      var geometry = new THREE.BoxGeometry(w, h, d, 8);
+      var loader = new THREE.TextureLoader();
+      var material = [
+        new THREE.MeshBasicMaterial({ map: loader.load('/model_3d/pumskin.jpg') }),
+        new THREE.MeshBasicMaterial({ map: loader.load('/model_3d/pumskin.jpg') }),
+        new THREE.MeshBasicMaterial({ map: loader.load('/model_3d/pumskin.jpg') }),
+        new THREE.MeshBasicMaterial({ map: loader.load('/model_3d/pumskin.jpg') }),
+        new THREE.MeshBasicMaterial({ map: loader.load('/model_3d/pumskin.jpg') }),
+        new THREE.MeshBasicMaterial({ map: loader.load('/model_3d/pumskin.jpg') }),
+        new THREE.MeshBasicMaterial({ map: loader.load('/model_3d/pumskin.jpg') })
+      ]
+      var mesh = new THREE.Mesh(
+          geometry,
+          material
+      );
+      mesh.castShadow = true;  
+      return mesh;}
+    
+    var box = getBox(0.5, 0.5, 0.5);
+    box.position.set(x, y, z);
+    box.rotation.x = 2 - Math.PI / 5;
+    
+    return {object: box, name: "barrier"};
+  }
   //load 1 loạt vật phẩm
   async function load_vatpham(scene) {
     let items = [];
@@ -424,9 +470,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     return sphere;
 }
   var sphere = getSphere(0.3);
-  sphere.position.x = 2.5;
-  sphere.position.y = 1.5;
-  sphere.position.z = -2;
+  sphere.position.set(2.5, 1.5, -2);
   scene.add(sphere);
 
   var pointLight = new THREE.PointLight(0xffffff, 0.5, 50);
@@ -443,10 +487,6 @@ document.addEventListener('DOMContentLoaded', async function () {
   light.shadow.camera.fov = 30; // Adjust field of view for spot light
   scene.add(light)
 
-    light.shadow.camera.near = 0.1; // Adjust near plane
-    light.shadow.camera.far = 25; // Adjust far plane
-    light.shadow.camera.fov = 30; // Adjust field of view for spot light
-    scene.add(light)
   const camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 1000);
   camera.position.set(0, 0, 4);
   scene.add(camera);
