@@ -10,7 +10,8 @@ import * as vatpham_ from './vatpham.js'
 document.addEventListener('DOMContentLoaded', async function () {
 
   let landSet = [], ghosts = [], oldghosts = [], vatpham = [], movementSpeed = 0.03, flag = 1, disappearTime, ghostspecialActive = false, speed_j=0.06;
-  
+  const boostedSpeed = 0.1; // Temporary speed boost
+  let isBoosted = false;
   async function start_game() {
     landSet = await land_.land_random(scene,-2)
     let inghost = await load_ghost(scene, -2.0, -0.82, -0.2);
@@ -21,37 +22,45 @@ document.addEventListener('DOMContentLoaded', async function () {
     ghosts.push(ing);
     scene.add(ing);
     
-    vatpham = await load_vatpham(scene);
-    const { updateGhostCountDisplay } = quantity_ghost(scene);
     vatpham = await vatpham_.load_vatpham_random(scene,landSet);
+    const { updateGhostCountDisplay } = quantity_ghost(scene);
+    //vatpham = await vatpham_.load_vatpham_random(scene,landSet);
 
     async function update() {
  
       renderer.render(scene, camera);
-      if (landSet[landSet.length-1].position.x<8.5)
+      if (landSet[landSet.length-1].position.x < 8)
         {
           let land_tam =await land_.land_random(scene, landSet[landSet.length-1].position.x + landSet[landSet.length-1].scale.x/2+5)
+          let vatpham_tam =await vatpham_.load_vatpham_random(scene, land_tam)
           for (let i = 0; i < land_tam.length; i++) 
-            landSet.push(land_tam[i]);
-          vatpham_.load_vatpham_random(scene,landSet);
+            {landSet.push(land_tam[i]);
+              vatpham.push(vatpham_tam[i]);}
+          //vatpham_.load_vatpham_random(scene,landSet);
         }
-      if(landSet[0].position.x+landSet[0].scale.x/2<-6) 
-        scene.remove(landSet.shift());
-
+        while (landSet[0].position.x + landSet[0].scale.x / 2 < -8) {
+          // Remove the first landSet item
+          const removedLand = landSet.shift();
+          scene.remove(removedLand);
       
-     /*if (vatpham[vatpham.length-1].object.position.x < 8.5)
-        {
-          let vatpham_tam =await vatpham_.load_vatpham_random(scene, landSet[landSet.length-1].position.x + landSet[landSet.length-1].scale.x/2+5)
-          for (let i = 0; i < vatpham_tam.length; i++) 
-            vatpham.push(vatpham_tam[i]);
+          // Remove the corresponding vatpham item
+         if (vatpham[0]&& vatpham[0].object.position.x < -8) {
+            const removedVatpham = vatpham.shift();
+            scene.remove(removedVatpham.object);
+         }
         }
-      if(vatpham[0].object.position.x+vatpham[0].object.scale.x/2<-6) 
-        scene.remove(vatpham.shift());*/
+      
+     
 
       land_.animation_land(landSet, movementSpeed);
 
-      
-     // vatpham_.animation_vatpham(vatpham,movementSpeed);
+      for (let i = vatpham.length - 1; i >= 0; i--) {
+        if (vatpham[i] && vatpham[i].object.position.x < -8) {
+          scene.remove(vatpham[i].object);
+          vatpham.splice(i, 1);
+        }
+      }
+      vatpham_.animation_vatpham(vatpham,movementSpeed);
 
       checkCollision();
       ghost_fall();
@@ -137,8 +146,10 @@ document.addEventListener('DOMContentLoaded', async function () {
         const ghostBox = new THREE.Box3().setFromObject(ghost);
         for (let j = 0; j < vatpham.length; j++) {
           const item = vatpham[j];
+          if (!item || !item.object) continue; 
           const itemBox = new THREE.Box3().setFromObject(item.object);
-          if (ghostBox.intersectsBox(itemBox) && item.name != "pumkin3") {
+
+          if (ghostBox.intersectsBox(itemBox) && item.name != "barrier") {
             console.log('Collision detected:', item);
             //vật phẩm biến mất
             scene.remove(item.object);
@@ -146,29 +157,36 @@ document.addEventListener('DOMContentLoaded', async function () {
             j--;
 
             //đụng bomb thì ma bị out 
-            if (!ghostspecialActive && item.name == "donut_special") {
+            if (!ghostspecialActive && item.name == "bomb") {
               // Flag the ghost for removal
               ghost.isRemoving = true;
               animateGhostRemoval(ghost);
+              //ghosts.splice(i, 1);
+     //         boostGhostSpeed(); 
               i--; // Adjust index to account for removal
+              //ghostCount = ghosts.length;
+              //updateGhostCountDisplay(ghostCount);
               break;
             }
 
             //đụng vật phẩm thì ma tăng thêm
             if (ghostspecialActive ==false && item.name =="donut") {
-                const newGhostPositionX = -2.0 - (ghosts.length * 0.3);
-                const newGhostPositionY = -0.82;
-                const newGhostPositionZ = -0.2;
+              const lastGhost = ghosts[ghosts.length - 1];
+              const newGhostPositionX = lastGhost.position.x - 0.3; // Adjust position relative to last ghost
+              const newGhostPositionY = lastGhost.position.y;
+              const newGhostPositionZ = lastGhost.position.z;
 
                 // Add new ghost
                 load_ghost(scene, newGhostPositionX, newGhostPositionY, newGhostPositionZ).then(newGhost => {
                   ghosts.push(newGhost);
                   scene.add(newGhost);
+                 // ghostCount = ghosts.length;
+                 // updateGhostCountDisplay(ghostCount);
                 });
               
             }
             // đang xử lý
-            if (item.name == "donut_specia") {
+            if (item.name == "donut_special") {
               if (!ghostspecialActive) {
                 ghostspecialActive = true;
                 oldghosts = [...ghosts];
@@ -209,7 +227,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       }
     
           //ma bị chặn lại
-          if (ghostspecialActive==false && ghostBox.intersectsBox(itemBox) && item.name == "pumpkin3") {
+          if (ghostspecialActive==false && ghostBox.intersectsBox(itemBox) && item.name == "barrier") {
             if (!ghost.isFrozen) {
               ghost.isFrozen = true;
               setTimeout(() => {
@@ -218,7 +236,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
           }
           // special ma
-          if(ghostspecialActive==true && ghostBox.intersectsBox(itemBox) && item.name == "pumpkin3")
+          if(ghostspecialActive==true && ghostBox.intersectsBox(itemBox) && item.name == "barrier")
             {
               if (!ghost.isFrozen) {
                 ghost.isFrozen = true;
@@ -268,6 +286,43 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (index > -1) ghosts.splice(index, 1);
   }
 
+  /*function boostGhostSpeed() {
+    if (!isBoosted) {
+      isBoosted = true;
+      const acceleration = 0.0005; // Gradual acceleration
+      let currentSpeed = movementSpeed;
+  
+      const interval = setInterval(() => {
+        let gapFilled = true;
+        for (let i = 1; i < ghosts.length; i++) {
+          const previousGhost = ghosts[i - 1];
+          const currentGhost = ghosts[i];
+          const distance = previousGhost.position.x - currentGhost.position.x;
+  
+          if (distance > 0.3) {
+            currentGhost.position.x += currentSpeed; // Increase position to fill the gap
+            gapFilled = false;
+          }
+        }
+  
+        if (gapFilled) {
+          clearInterval(interval);
+          isBoosted = false;
+        } else {
+          currentSpeed += acceleration; // Gradually increase the speed
+        }
+      }, 555); // Run every frame (16ms for 60fps)
+    }
+  }*/
+
+ /* function boostGhostSpeed() {
+    isBoosted = true;
+    movementSpeed = boostedSpeed;
+    setTimeout(() => {
+      movementSpeed = 0.03;
+      isBoosted = false;
+    }, 1000);
+  }*/
 
   // ma nhảy  
   function oneJump() {
