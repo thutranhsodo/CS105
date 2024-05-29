@@ -1,26 +1,44 @@
-export function quantity_ghost()
+import * as THREE from 'three';
+
+export function quantity_ghost(scene)
 {
-    function createQuantityGhost() {
-        let ghost_q = document.getElementById('ghostCount');
-        if (!ghost_q) {
-            ghost_q = document.createElement('div');
-            ghost_q.id = 'ghostCount';
-            ghost_q.style.position = 'absolute';
-            ghost_q.style.top = '10px';
-            ghost_q.style.left = '150px';
-            ghost_q.style.color = 'black';
-            ghost_q.style.fontSize = '24px';
-            ghost_q.innerHTML = 'Ghost: 2';
-            document.body.appendChild(ghost_q);
-        }
-        return ghost_q;
+    let ghostCount;
+    function createGhostElement(scene) {
+        // Khởi tạo canvas và context để vẽ điểm số và điểm số cao
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = 600; //càng to thì càng nhỏ
+        canvas.height = 500;
+        // context.fillStyle = '#000000'; // Màu nền (đen)
+        // context.fillRect(0, 0, canvas.width, canvas.height);
+        context.font = 'Bold 40px Arial';//px: độ rõ/mờ của chữ
+        context.fillStyle = 'white';
+    
+        // Tạo texture cho điểm số
+        const ghostTexture = new THREE.CanvasTexture(canvas);
+    
+        // Tạo vật liệu sử dụng texture
+        const ghostMaterial = new THREE.MeshBasicMaterial({ map: ghostTexture, transparent: true });
+    
+        // Tạo geometry và mesh cho điểm số
+        const ghostGeometry = new THREE.PlaneGeometry(4, 2);
+        const ghostMesh = new THREE.Mesh(ghostGeometry, ghostMaterial);
+        ghostMesh.position.set(-1, 1, -1); // Đặt vị trí của mesh
+    
+        // Thêm mesh vào scene
+        scene.add(ghostMesh);
+    
+        return { canvas, context, ghostTexture, ghostMesh };
     }
-    createQuantityGhost();
-    document.addEventListener('DOMContentLoaded', (event) => {
-        createQuantityGhost();        
-    });
+    const { canvas, context, ghostTexture } = createGhostElement(scene);
+
+    function updateGhostCountDisplay(ghostCount) {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.fillText("Ghost: " + ghostCount, 10, 30);
+        ghostTexture.needsUpdate = true;
+    }
+    return {updateGhostCountDisplay};
 }
-export function updateGhostCountDisplay(ghostCount) {
-    const ghostCountElement = document.getElementById("ghostCount");
-    ghostCountElement.textContent = "Ghost: " + ghostCount;
-  }
+
+const scene = new THREE.Scene();
+export const { updateGhostCountDisplay } = quantity_ghost(scene);

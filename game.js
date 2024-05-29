@@ -4,14 +4,13 @@ import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/exampl
 import { DRACOLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/DRACOLoader.js";
 //import * as CANNON from "cannon";
 import { process_score } from './process_score.js';
-import { updateGhostCountDisplay } from './quantity_ghost.js';
 import { quantity_ghost } from './quantity_ghost.js';
 import * as land_ from './land.js';
 
 document.addEventListener('DOMContentLoaded', async function () {
 
   let landSet = [], ghosts = [], oldghosts = [], vatpham = [], movementSpeed = 0.03, flag = 1, disappearTime, ghostspecialActive = false, speed_j=0.06;
-
+  
   async function start_game() {
     landSet = await land_.land_random(scene,-2)
     let inghost = await load_ghost(scene, -2.0, -0.82, -0.2);
@@ -23,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     scene.add(ing);
     
     vatpham = await load_vatpham(scene);
-
+    const { updateGhostCountDisplay } = quantity_ghost(scene);
     async function update() {
  
       renderer.render(scene, camera);
@@ -40,12 +39,13 @@ document.addEventListener('DOMContentLoaded', async function () {
       checkCollision();
       ghost_fall();
       oneJump();
-      
+      updateGhostCountDisplay(ghosts.length);
       //check();
       controls.update();
       requestAnimationFrame(update);
+      
     }
-
+    quantity_ghost(scene);
     update();
   }
   
@@ -210,7 +210,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
   }
 
-  let ghostCount = ghosts.length;
 
   function checkCollision() {
     if (ghosts && vatpham) {
@@ -235,8 +234,6 @@ document.addEventListener('DOMContentLoaded', async function () {
               ghost.isRemoving = true;
               animateGhostRemoval(ghost);
               i--; // Adjust index to account for removal
-              ghostCount = ghosts.length;
-              updateGhostCountDisplay(ghostCount);
               break;
             }
 
@@ -251,8 +248,6 @@ document.addEventListener('DOMContentLoaded', async function () {
                 load_ghost(scene, newGhostPositionX, newGhostPositionY, newGhostPositionZ).then(newGhost => {
                   ghosts.push(newGhost);
                   scene.add(newGhost);
-                  ghostCount = ghosts.length;
-                  updateGhostCountDisplay(ghostCount);
                 });
               }
             }
@@ -458,6 +453,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     height: window.innerHeight,
   };
 
+  
+
   function getSphere(size) {
     var sphereGeometry = new THREE.SphereGeometry(size, 24, 24);
     var material = new THREE.MeshStandardMaterial({
@@ -516,7 +513,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     } catch (error) {
       console.error("Error:", error);
     }
-    process_score();
-    quantity_ghost();
+    process_score(scene);
+    //quantity_ghost(scene);
   });
 });
