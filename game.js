@@ -7,7 +7,7 @@ import { process_score } from './process_score.js';
 import { updateGhostCountDisplay } from './quantity_ghost.js';
 import { quantity_ghost } from './quantity_ghost.js';
 import * as land_ from './land.js';
-
+import * as vatpham_ from './vatpham.js'
 document.addEventListener('DOMContentLoaded', async function () {
 
   let landSet = [], ghosts = [], oldghosts = [], vatpham = [], movementSpeed = 0.03, flag = 1, disappearTime, ghostspecialActive = false, speed_j=0.06;
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     ghosts.push(ing);
     scene.add(ing);
     
-    vatpham = await load_vatpham(scene);
+    vatpham = await vatpham_.load_vatpham_random(scene,landSet);
 
     async function update() {
  
@@ -32,11 +32,26 @@ document.addEventListener('DOMContentLoaded', async function () {
           let land_tam =await land_.land_random(scene, landSet[landSet.length-1].position.x + landSet[landSet.length-1].scale.x/2+5)
           for (let i = 0; i < land_tam.length; i++) 
             landSet.push(land_tam[i]);
+          vatpham_.load_vatpham_random(scene,landSet);
         }
       if(landSet[0].position.x+landSet[0].scale.x/2<-6) 
         scene.remove(landSet.shift());
+
+      
+     /*if (vatpham[vatpham.length-1].object.position.x < 8.5)
+        {
+          let vatpham_tam =await vatpham_.load_vatpham_random(scene, landSet[landSet.length-1].position.x + landSet[landSet.length-1].scale.x/2+5)
+          for (let i = 0; i < vatpham_tam.length; i++) 
+            vatpham.push(vatpham_tam[i]);
+        }
+      if(vatpham[0].object.position.x+vatpham[0].object.scale.x/2<-6) 
+        scene.remove(vatpham.shift());*/
+
       land_.animation_land(landSet, movementSpeed);
-      animation_vatpham();
+
+      
+     // vatpham_.animation_vatpham(vatpham,movementSpeed);
+
       checkCollision();
       ghost_fall();
       oneJump();
@@ -50,100 +65,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   }
   
   //load_donut lẻ
-  async function load_bomb(scene, x, y, z) {
-    const loader = new GLTFLoader();
-    const gltf = await loader.loadAsync('./model_3d/donut_1.glb');
-    const donut = gltf.scene;
-    donut.scale.set(0.2, 0.2, 0.2);
-    donut.position.set(x, y, z);
-    donut.rotation.x = 2 - Math.PI / 5;
 
-    donut.traverse(function (child) {
-      if (child.isMesh) {
-        child.receiveShadow = true;
-        child.castShadow = true;  // Enable shadow casting
-      }
-  });
-    
-    return { object: donut,  name: "donut" };
-  }
-  //load_donut_special
-  async function load_bomb_special(scene, x, y, z) {
-    const loader = new GLTFLoader();
-    const gltf = await loader.loadAsync('./model_3d/donut_special.glb');
-    const donut = gltf.scene;
-    donut.scale.set(0.2, 0.2, 0.2);
-    donut.position.set(x, y, z);
-    donut.rotation.x = 2 - Math.PI / 5;
-
-    donut.traverse(function (child) {
-      if (child.isMesh) {
-        child.receiveShadow = true;
-        child.castShadow = true;  // Enable shadow casting
-      }
-  });
-    donut.receiveShadow = true;
-    
-    return { object: donut, name: "donut_special" };
-  }
-  //load_Bomb
-  function load_Bomb(scene, x, y, z)
-  {
-    function getBomb(size) {
-      var sphereGeometry = new THREE.SphereGeometry(size, 24, 24);
-      var loader = new THREE.TextureLoader();
-      var texture = loader.load('/model_3d/Bomb.jpg');
-      var material = new THREE.MeshBasicMaterial({ map: texture });
-      var sphere = new THREE.Mesh(sphereGeometry, material);
-      sphere.castShadow = true;
-      return sphere;
-    }
-    var bomb = getBomb(0.2);
-    bomb.position.set(x, y, z);
-    bomb.rotation.x = 2 - Math.PI / 5;
-
-    return {object: bomb, name: "bomb"};
-  }
-  //load vật cản
-  function load_barrier(scene, x, y, z)
-  {
-    function getBox(w, h, d){
-      var geometry = new THREE.BoxGeometry(w, h, d, 8);
-      var loader = new THREE.TextureLoader();
-      var material = [
-        new THREE.MeshBasicMaterial({ map: loader.load('/model_3d/pumskin.jpg') }),
-        new THREE.MeshBasicMaterial({ map: loader.load('/model_3d/pumskin.jpg') }),
-        new THREE.MeshBasicMaterial({ map: loader.load('/model_3d/pumskin.jpg') }),
-        new THREE.MeshBasicMaterial({ map: loader.load('/model_3d/pumskin.jpg') }),
-        new THREE.MeshBasicMaterial({ map: loader.load('/model_3d/pumskin.jpg') }),
-        new THREE.MeshBasicMaterial({ map: loader.load('/model_3d/pumskin.jpg') }),
-        new THREE.MeshBasicMaterial({ map: loader.load('/model_3d/pumskin.jpg') })
-      ]
-      var mesh = new THREE.Mesh(
-          geometry,
-          material
-      );
-      mesh.castShadow = true;  
-      return mesh;}
-    
-    var box = getBox(0.5, 0.5, 0.5);
-    box.position.set(x, y, z);
-    box.rotation.x = 2 - Math.PI / 5;
-    
-    return {object: box, name: "barrier"};
-  }
-  //load 1 loạt vật phẩm
-  async function load_vatpham(scene) {
-    let items = [];
-    let donut;
-    for (let i = 0; i < landSet.length; i++) {
-      if (i % 2 == 0) { donut = await load_bomb(scene, landSet[i].position.x, landSet[i].position.y + 1.3, landSet[i].position.z - 0.3); }
-      else { donut = await load_bomb_special(scene, landSet[i].position.x, landSet[i].position.y + 1.3, landSet[i].position.z - 0.3); }
-      scene.add(donut.object);
-      items.push(donut);
-    }
-    return items;
-  }
   //load_ghost
   async function load_ghost(scene, x, y, z) {
     const loader = new GLTFLoader();
@@ -171,14 +93,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   }
   //chuyển động 1 landSet
   //chuyển động vatphamSet
-  function animation_vatpham() {
-    for (let i = 0; i < vatpham.length; i++) {
-      if (vatpham[i] && vatpham[i].object) {
-        vatpham[i].object.position.x -= movementSpeed;
-      
-      }
-    }
-  }
+
   let isJumping = false;
 
   //let ghoststop = false;
@@ -211,7 +126,6 @@ document.addEventListener('DOMContentLoaded', async function () {
   }
 
   let ghostCount = ghosts.length;
-
   function checkCollision() {
     if (ghosts && vatpham) {
       for (let i = 0; i < ghosts.length; i++) {
@@ -222,7 +136,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         for (let j = 0; j < vatpham.length; j++) {
           const item = vatpham[j];
           const itemBox = new THREE.Box3().setFromObject(item.object);
-          if (ghostBox.intersectsBox(itemBox) && item.name !== "chan") {
+          if (ghostBox.intersectsBox(itemBox) && item.name != "pumkin3") {
             console.log('Collision detected:', item);
             //vật phẩm biến mất
             scene.remove(item.object);
@@ -230,7 +144,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             j--;
 
             //đụng bomb thì ma bị out 
-            if (!ghostspecialActive && item.name === "bomb") {
+            if (!ghostspecialActive && item.name == "donut_special") {
               // Flag the ghost for removal
               ghost.isRemoving = true;
               animateGhostRemoval(ghost);
@@ -241,8 +155,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
 
             //đụng vật phẩm thì ma tăng thêm
-            if (item.name === "donut") {
-              if (!ghostspecialActive) {
+            if (ghostspecialActive ==false && item.name =="donut") {
                 const newGhostPositionX = -2.0 - (ghosts.length * 0.3);
                 const newGhostPositionY = -0.82;
                 const newGhostPositionZ = -0.2;
@@ -254,67 +167,51 @@ document.addEventListener('DOMContentLoaded', async function () {
                   ghostCount = ghosts.length;
                   updateGhostCountDisplay(ghostCount);
                 });
-              }
+              
             }
-            /* đang xử lý
-            if (item.name == "donut_special") {
+            // đang xử lý
+            if (item.name == "donut_specia") {
               if (!ghostspecialActive) {
                 ghostspecialActive = true;
                 oldghosts = [...ghosts];
                 for (let j = 0; j < ghosts.length; j++) {
-                  
-                  scene.remove(ghosts[j].object);
-                  if (ghosts[j].body) { 
-                    world.remove(ghosts[j].body); 
-                  }
+                  scene.remove(ghosts[j]);
                   ghosts.splice(j, 1);
                   j--;
               }
              // ghosts = [];
-              load_ghost_big(scene, -2.0, -0.82, -0.2).then(specialGhost => {
+              load_ghost_big(scene, -2.0, 0, -0.2).then(specialGhost => {
                 ghosts.push(specialGhost);
-                scene.add(specialGhost.object);
+                scene.add(specialGhost);
                 
-               // world.addBody(specialGhost.body);
                 setTimeout(() => {
-                  scene.remove(specialGhost.object);
-                  if (specialGhost.body) {
-                    world.remove(specialGhost.body);
-                  }
-                  if (ghosts.length == oldghosts.length) ghosts = oldghosts;
+                  scene.remove(specialGhost);
+                  
+                  ghosts = oldghosts;
                   for (let k = 0; k < ghosts.length; k++) {
-                    scene.add(ghosts[k].object);
-                    if (ghosts[k].body) {
-                      world.add(ghosts[k].body);
-                    }
+                    scene.add(ghosts[k]);
                   }
                   ghostspecialActive = false;
                 }, 10000);
 
               });
             }
-          }*/
-        }
-        if (ghostspecialActive && ghostBox.intersectsBox(itemBox)) {
-          if (item.name === "donu") {
+          }
+        
+        if (ghostspecialActive==true && ghostBox.intersectsBox(itemBox)) {
+          if (item.name == "donut") {
             const newGhostPositionX = -2.0 - (oldghosts.length * 0.3);
             const newGhostPositionY = -0.82;
             const newGhostPositionZ = -0.2;
             load_ghost(scene, newGhostPositionX, newGhostPositionY, newGhostPositionZ).then(newGhost => {
               oldghosts.push(newGhost);
-             
-              
             });
           }
-        
-          // Skip removal of special ghost on "chan" and "bomb"
-          //if (item.name ==="chan")
-          //  {
-
-           // }
+        }
       }
+    
           //ma bị chặn lại
-          if (!ghostspecialActive && ghostBox.intersectsBox(itemBox) && item.name === "chan") {
+          if (ghostspecialActive==false && ghostBox.intersectsBox(itemBox) && item.name == "pumpkin3") {
             if (!ghost.isFrozen) {
               ghost.isFrozen = true;
               setTimeout(() => {
@@ -323,7 +220,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
           }
           // special ma
-          if(ghostspecialActive && ghostBox.intersectsBox(itemBox) && item.name === "chan")
+          if(ghostspecialActive==true && ghostBox.intersectsBox(itemBox) && item.name == "pumpkin3")
             {
               if (!ghost.isFrozen) {
                 ghost.isFrozen = true;
