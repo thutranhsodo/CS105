@@ -7,7 +7,7 @@ async function load_donut(scene,x,y,z) {
     const donut = gltf.scene;
     donut.scale.set(0.2, 0.2, 0.2);
     donut.position.set(x, y, z);
-    donut.rotation.x = 2 - Math.PI / 5;
+    //donut.rotation.x = 2 - Math.PI / 5;
 
     donut.traverse(function (child) {
       if (child.isMesh) {
@@ -25,7 +25,7 @@ async function load_donut(scene,x,y,z) {
     const donut = gltf.scene;
     donut.scale.set(0.2, 0.2, 0.2);
     donut.position.set(x, y, z);
-    donut.rotation.x = 2 - Math.PI / 5;
+    //donut.rotation.x = 2 - Math.PI / 5;
 
     donut.traverse(function (child) {
       if (child.isMesh) {
@@ -50,8 +50,8 @@ async function load_donut(scene,x,y,z) {
       return sphere;
     }
     var bomb = getBomb(0.2);
-   bomb.position.set(x, y, z);
-    bomb.rotation.x = 2 - Math.PI / 5;
+    bomb.position.set(x, y, z);
+    //bomb.rotation.x = 2 - Math.PI / 5;
 
     return {object: bomb, name: "bomb"};
   }
@@ -78,8 +78,8 @@ async function load_donut(scene,x,y,z) {
       return mesh;}
     
     var box = getBox(0.5, 0.5, 0.5);
-   box.position.set(x, y, z);
-    box.rotation.x = 2 - Math.PI / 5;
+    box.position.set(x, y, z);
+    //box.rotation.x = 2 - Math.PI / 5;
     
     return {object: box, name: "barrier"};
   }
@@ -91,7 +91,7 @@ async function load_donut(scene,x,y,z) {
     // Ensure each item loader is used at least once
     for (let i = 0; i < itemLoaders.length ; i++) {
         let loader = itemLoaders[i];
-        let item = await loader(scene, landSet[i].position.x, landSet[i].position.y + 1.3, landSet[i].position.z - 0.3);
+        let item = await loader(scene, landSet[i].position.x, landSet[i].position.y + 1.3, landSet[i].position.z);
         scene.add(item.object);
         items.push(item);
     }
@@ -99,7 +99,7 @@ async function load_donut(scene,x,y,z) {
     // Fill the rest of the slots
     for (let i = itemLoaders.length; i < 8; i++) {
         let randomLoader = itemLoaders[Math.floor(Math.random() * itemLoaders.length)];
-        let item = await randomLoader(scene, landSet[i].position.x, landSet[i].position.y + 1.3, landSet[i].position.z - 0.3);
+        let item = await randomLoader(scene, landSet[i].position.x, landSet[i].position.y + 1.3, landSet[i].position.z);
         scene.add(item.object);           
         items.push(item);
     }

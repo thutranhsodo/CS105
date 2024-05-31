@@ -399,6 +399,31 @@ document.addEventListener('DOMContentLoaded', async function () {
     scene.add(model);
   });
 
+  function loadModel(ulr, x, y, z){
+    loader.load(ulr, (gltf) => {
+    const model = gltf.scene;
+    let mixer = new THREE.AnimationMixer(model);
+    gltf.animations.forEach((clip) => {
+      mixer.clipAction(clip).play();
+    });
+    model.scale.set(0.2, 0.2, 0.2);
+    model.position.set(x, y, z);
+    model.rotation.set(0,4.5,0);
+    scene.add(model);
+    function animate() {
+      requestAnimationFrame(animate);
+      if (mixer) {
+          mixer.update(0.01);
+      }
+      renderer.render(scene, camera);
+    }
+    animate();
+    });
+  }
+  loadModel('./model_3d/vampire_bat.glb', -3, 1.3, -1.4);
+  loadModel('./model_3d/vampire_bat.glb', -0.2, 2, -2.5);
+  loadModel('./model_3d/vampire_bat.glb', 3.2, 0.7, -2);
+
   //const light = new THREE.DirectionalLight(0xffffff, 1);
   //light.position.set(2, 2, 5);
   //scene.add(light);
@@ -469,6 +494,19 @@ document.addEventListener('DOMContentLoaded', async function () {
       console.error("Error:", error);
     }
     process_score(scene);
-    //quantity_ghost(scene);
+    const listener = new THREE.AudioListener();
+    camera.add(listener);
+
+    // Tạo một đối tượng Audio và kết nối nó với AudioListener
+    const sound = new THREE.Audio(listener);
+
+    // Tạo AudioLoader và tải tệp âm thanh
+    const audioLoader = new THREE.AudioLoader();
+    audioLoader.load('./LoonboonIngame-LauraShigihara-4870104.mp3', function(buffer) {
+        sound.setBuffer(buffer);
+        sound.setLoop(true); // Đặt âm thanh lặp lại nếu muốn
+        sound.setVolume(1); // Đặt âm lượng
+        sound.play(); // Phát âm thanh
+    });
   });
 });
