@@ -484,6 +484,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   const container = document.querySelector('.background-container');
   const buttonStart = document.querySelector('.button01');
+  const buttonInstruction = document.querySelector('.button02');
   buttonStart.addEventListener('click', async function () {
     console.log("Button Start clicked!");
     container.parentNode.removeChild(container);
@@ -509,4 +510,9 @@ document.addEventListener('DOMContentLoaded', async function () {
         sound.play(); // Phát âm thanh
     });*/
   });
+  buttonInstruction.addEventListener('click', async function ()
+  {
+    const imageContainer = document.getElementById('instruction');
+    imageContainer.style.display = 'block';
+})
 });

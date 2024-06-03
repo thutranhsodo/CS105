@@ -21,8 +21,11 @@
   <button class="button03">
     <img src="./start_screen/music-03.png" alt="buttonpng"height="140px" width="140px">
   </button>
-    
+
+  <div id="instruction" class="hidden">
+    <img src="./start_screen/instruction-02.png"  alt="your-image" id="imageToShow">  
   </div>
+
   <div class="game">
     <!--<div id="score">Score: 0</div>-->
     <div id="highScore"></div>
@@ -125,6 +128,18 @@
   top: 30px;
   right: 30px;
 }
+#instruction {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+
+        #instruction img {
+            max-width: 100%;
+            max-height: 100%;
+        }
 </style>
 
 </html>
