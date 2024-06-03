@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 setTimeout(() => {
                   scene.remove(specialGhost);
                   
-                  ghosts = oldghosts;
+                  if(ghosts.length > 0 ) ghosts = oldghosts;
                   for (let k = 0; k < ghosts.length; k++) {
                     scene.add(ghosts[k]);
                   }
@@ -494,7 +494,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       console.error("Error:", error);
     }
     process_score(scene);
-    const listener = new THREE.AudioListener();
+    /*const listener = new THREE.AudioListener();
     camera.add(listener);
 
     // Tạo một đối tượng Audio và kết nối nó với AudioListener
@@ -507,6 +507,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         sound.setLoop(true); // Đặt âm thanh lặp lại nếu muốn
         sound.setVolume(1); // Đặt âm lượng
         sound.play(); // Phát âm thanh
-    });
+    });*/
   });
 });
