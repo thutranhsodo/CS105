@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       ghost_fall();
       oneJump();
       updateGhostCountDisplay(ghosts.length);
+      if (ghosts.length==0) cancelAnimationFrame();
       //check();
       controls.update();
       requestAnimationFrame(update);
