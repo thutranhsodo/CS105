@@ -392,14 +392,15 @@ document.addEventListener('DOMContentLoaded', async function () {
   const loader = new GLTFLoader();
   loader.setDRACOLoader(dracoLoader);
 
-  loader.load('./model_3d/background_cat.glb', (gltf) => {
+ /* loader.load('./model_3d/background_cat.glb', (gltf) => {
     const model = gltf.scene;
     model.scale.set(0.2, 0.2, 0.2);
     model.position.set(1.5, -0.7, -1.4);
     scene.add(model);
   });
-
-  function loadModel(ulr, x, y, z){
+*/
+  
+  /*function loadModel(ulr, x, y, z){
     loader.load(ulr, (gltf) => {
     const model = gltf.scene;
     let mixer = new THREE.AnimationMixer(model);
@@ -423,7 +424,8 @@ document.addEventListener('DOMContentLoaded', async function () {
   loadModel('./model_3d/vampire_bat.glb', -3, 1.3, -1.4);
   loadModel('./model_3d/vampire_bat.glb', -0.2, 2, -2.5);
   loadModel('./model_3d/vampire_bat.glb', 3.2, 0.7, -2);
-
+*/
+  
   //const light = new THREE.DirectionalLight(0xffffff, 1);
   //light.position.set(2, 2, 5);
   //scene.add(light);
