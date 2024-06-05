@@ -23,7 +23,7 @@ async function load_donut(scene,x,y,z) {
     const loader = new GLTFLoader();
     const gltf = await loader.loadAsync('./model_3d/donut_special.glb');
     const donut = gltf.scene;
-    donut.scale.set(0.2, 0.2, 0.2);
+    donut.scale.set(0.15, 0.15, 0.15);
     donut.position.set(x, y, z);
     //donut.rotation.x = 2 - Math.PI / 5;
 
@@ -91,7 +91,7 @@ async function load_donut(scene,x,y,z) {
     // Ensure each item loader is used at least once
     for (let i = 0; i < itemLoaders.length ; i++) {
         let loader = itemLoaders[i];
-        let item = await loader(scene, landSet[i].position.x, landSet[i].position.y + 1.3, landSet[i].position.z);
+        let item = await loader(scene, landSet[i].position.x, landSet[i].position.y + 0.7, landSet[i].position.z);
         scene.add(item.object);
         items.push(item);
     }
@@ -99,7 +99,7 @@ async function load_donut(scene,x,y,z) {
     // Fill the rest of the slots
     for (let i = itemLoaders.length; i < 8; i++) {
         let randomLoader = itemLoaders[Math.floor(Math.random() * itemLoaders.length)];
-        let item = await randomLoader(scene, landSet[i].position.x, landSet[i].position.y + 1.3, landSet[i].position.z);
+        let item = await randomLoader(scene, landSet[i].position.x, landSet[i].position.y + 0.7, landSet[i].position.z);
         scene.add(item.object);           
         items.push(item);
     }
@@ -110,7 +110,8 @@ async function load_donut(scene,x,y,z) {
 export function animation_vatpham(vatpham,movementSpeed) {
     for (let i = 0; i < vatpham.length; i++) {
       if (vatpham[i] && vatpham[i].object) {
-        vatpham[i].object.position.x -= movementSpeed; 
+        vatpham[i].object.position.x -= movementSpeed;
+        vatpham[i].object.rotation.y += 0.03
       }
     }
   }

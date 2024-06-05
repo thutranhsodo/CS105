@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   const boostedSpeed = 0.1; // Temporary speed boost
   let isBoosted = false;
   async function start_game() {
-    landSet = await land_.land_random(scene,-2)
+    landSet = land_.land_random(scene,-2)
     let inghost = await load_ghost(scene, -2.0, -0.82, -0.2);
     ghosts.push(inghost);
     scene.add(inghost);
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       renderer.render(scene, camera);
       if (landSet[landSet.length-1].position.x < 8)
         {
-          let land_tam =await land_.land_random(scene, landSet[landSet.length-1].position.x + landSet[landSet.length-1].scale.x/2+5)
+          let land_tam =land_.land_random(scene, landSet[landSet.length-1].position.x + landSet[landSet.length-1].scale.x/2+5)
           let vatpham_tam =await vatpham_.load_vatpham_random(scene, land_tam)
           for (let i = 0; i < land_tam.length; i++) 
             {landSet.push(land_tam[i]);
@@ -64,9 +64,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 
       checkCollision();
       ghost_fall();
-      oneJump();
+      if (ghostspecialActive!=true) oneJump(0.8,-0.78,-0.65, -0.75);
+      else oneJump(1.5,-0.4, -0.2, -0.4)
       updateGhostCountDisplay(ghosts.length);
-      if (ghosts.length==0) cancelAnimationFrame();
+      if ((ghosts.length==0 && ghostspecialActive!=true) ) cancelAnimationFrame();
       //check();
       controls.update();
       requestAnimationFrame(update);
@@ -86,6 +87,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     ghost.scale.set(0.15, 0.2, 0.15);
     ghost.position.set(x, y, z);
     ghost.rotation.y = Math.PI / 2 - 0.2;
+    ghost. receiveShadow = true;
+    ghost.castShadow = true;
     //scene.add(ghost);
     return ghost;
   }
@@ -110,10 +113,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   //let ghoststop = false;
   //chuyển động ma
-  function animation_ghost(ghost, maxheight, speed) {
+  function animation_ghost(ghost, maxheight, minheight, speed) {
     //if (!ghost || !ghost.object ) return;
     
-    if (ghost.isFrozen) {
+    if (ghost.isFrozen ) {
       ghost.position.x -= movementSpeed; // Stop animation if frozen
     }
     //nhảy lên 
@@ -123,10 +126,11 @@ document.addEventListener('DOMContentLoaded', async function () {
       } else {
         flag = 2;
       }
+      if (ghost.isFrozen) ghost.position.x+=movementSpeed+0.005
     }
     //đáp xuống tiếp tục chuyển động
     if (flag == 2) {
-      if (ghost.position.y > -0.84) {
+      if (ghost.position.y > minheight) {
         ghost.position.y -= speed;
      
       } else {
@@ -173,9 +177,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             //đụng vật phẩm thì ma tăng thêm
             if (ghostspecialActive ==false && item.name =="donut") {
               const lastGhost = ghosts[ghosts.length - 1];
-              const newGhostPositionX = lastGhost.position.x - 0.3; // Adjust position relative to last ghost
-              const newGhostPositionY = lastGhost.position.y;
-              const newGhostPositionZ = lastGhost.position.z;
+              const newGhostPositionX = -2.0 - (ghosts.length * 0.3);
+              const newGhostPositionY = -0.82;
+              const newGhostPositionZ = -0.2;
 
                 // Add new ghost
                 load_ghost(scene, newGhostPositionX, newGhostPositionY, newGhostPositionZ).then(newGhost => {
@@ -197,7 +201,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                   j--;
               }
              // ghosts = [];
-              load_ghost_big(scene, -2.0, 0, -0.2).then(specialGhost => {
+              load_ghost_big(scene, -2.0, -0.4, -0.2).then(specialGhost => {
                 ghosts.push(specialGhost);
                 scene.add(specialGhost);
                 
@@ -243,7 +247,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 ghost.isFrozen = true;
                 setTimeout(() => {
                   removeGhost(ghost);
-                }, 3000);
+                }, 1000);
               }
             }
         }
@@ -326,7 +330,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   }*/
 
   // ma nhảy  
-  function oneJump() {
+  function oneJump(maxheight1, minheight1, maxheight2, minheight2) {
     document.addEventListener('keydown', function (event) {
       if (event.keyCode === 32 && !isJumping) {
         isJumping = true;
@@ -336,11 +340,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     for (let i = 0; i < ghosts.length; i++) {
       if (isJumping)
           {
-            animation_ghost(ghosts[i],0.5, speed_j)
+            animation_ghost(ghosts[i], maxheight1 , minheight1, speed_j)
             if (flag==1) speed_j=Math.max(0.025, speed_j-0.003)
             else speed_j+=0.0002
           }
-      if (!isJumping) animation_ghost(ghosts[i],-0.75, 0.005);
+      if (!isJumping) animation_ghost(ghosts[i], maxheight2, minheight2, 0.005);
   }
   }
 
@@ -393,13 +397,12 @@ document.addEventListener('DOMContentLoaded', async function () {
   const loader = new GLTFLoader();
   loader.setDRACOLoader(dracoLoader);
 
- /* loader.load('./model_3d/background_cat.glb', (gltf) => {
+  loader.load('./model_3d/background_cat.glb', (gltf) => {
     const model = gltf.scene;
     model.scale.set(0.2, 0.2, 0.2);
     model.position.set(1.5, -0.7, -1.4);
     scene.add(model);
   });
-*/
   
   /*function loadModel(ulr, x, y, z){
     loader.load(ulr, (gltf) => {
@@ -424,8 +427,8 @@ document.addEventListener('DOMContentLoaded', async function () {
   }
   loadModel('./model_3d/vampire_bat.glb', -3, 1.3, -1.4);
   loadModel('./model_3d/vampire_bat.glb', -0.2, 2, -2.5);
-  loadModel('./model_3d/vampire_bat.glb', 3.2, 0.7, -2);
-*/
+  loadModel('./model_3d/vampire_bat.glb', 3.2, 0.7, -2);*/
+
   
   //const light = new THREE.DirectionalLight(0xffffff, 1);
   //light.position.set(2, 2, 5);
@@ -458,7 +461,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   sphere.add(pointLight);
   
   var light= new THREE.DirectionalLight(0xffffff,1.5);
-  light.position.set(2, 2, 2);
+  light.position.set(2, 7, 3);
   //light.position.y = 10;
   light.castShadow = true;
 
@@ -488,6 +491,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   const container = document.querySelector('.background-container');
   const buttonStart = document.querySelector('.button01');
   const buttonInstruction = document.querySelector('.button02');
+  const closeInstructionButton = document.getElementById('close-instruction');
   buttonStart.addEventListener('click', async function () {
     console.log("Button Start clicked!");
     container.parentNode.removeChild(container);
@@ -498,7 +502,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       console.error("Error:", error);
     }
     process_score(scene);
-    /*const listener = new THREE.AudioListener();
+    const listener = new THREE.AudioListener();
     camera.add(listener);
 
     // Tạo một đối tượng Audio và kết nối nó với AudioListener
@@ -511,11 +515,15 @@ document.addEventListener('DOMContentLoaded', async function () {
         sound.setLoop(true); // Đặt âm thanh lặp lại nếu muốn
         sound.setVolume(1); // Đặt âm lượng
         sound.play(); // Phát âm thanh
-    });*/
+    });
   });
   buttonInstruction.addEventListener('click', async function ()
   {
     const imageContainer = document.getElementById('instruction');
     imageContainer.style.display = 'block';
 })
+  closeInstructionButton.addEventListener('click', function(){
+    const instructionContainer = document.getElementById('instruction');
+    instructionContainer.style.display = 'none';
+  });
 });
