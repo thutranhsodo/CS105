@@ -7,6 +7,7 @@ import { process_score } from './process_score.js';
 import { quantity_ghost } from './quantity_ghost.js';
 import * as land_ from './land.js';
 import * as vatpham_ from './vatpham.js'
+import { music } from './music.js';
 document.addEventListener('DOMContentLoaded', async function () {
 
   let landSet = [], ghosts = [], oldghosts = [], vatpham = [], movementSpeed = 0.03, flag = 1, disappearTime, ghostspecialActive = false, speed_j=0.06;
@@ -27,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     vatpham = await vatpham_.load_vatpham_random(scene,landSet);
     const { updateGhostCountDisplay } = quantity_ghost(scene);
     //vatpham = await vatpham_.load_vatpham_random(scene,landSet);
-
+    
     async function update() {
       if (isgameover) return;
 
@@ -529,7 +530,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   controls.enableZoom = false;
 
   const container = document.querySelector('.background-container');
-  const buttonStart = document.querySelector('.button01');
+  const buttonStart = document.querySelector('.button01, .restart');
   const buttonInstruction = document.querySelector('.button02');
   const closeInstructionButton = document.getElementById('close-instruction');
   buttonStart.addEventListener('click', async function () {
@@ -542,20 +543,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       console.error("Error:", error);
     }
     process_score(scene);
-    const listener = new THREE.AudioListener();
-    camera.add(listener);
-
-    // Tạo một đối tượng Audio và kết nối nó với AudioListener
-    const sound = new THREE.Audio(listener);
-
-    // Tạo AudioLoader và tải tệp âm thanh
-    const audioLoader = new THREE.AudioLoader();
-    audioLoader.load('./LoonboonIngame-LauraShigihara-4870104.mp3', function(buffer) {
-        sound.setBuffer(buffer);
-        sound.setLoop(true); // Đặt âm thanh lặp lại nếu muốn
-        sound.setVolume(1); // Đặt âm lượng
-        sound.play(); // Phát âm thanh
-    });
+    music(scene, camera);
   });
   buttonInstruction.addEventListener('click', async function ()
   {

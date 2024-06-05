@@ -30,6 +30,15 @@
     </button>
   </div>
 
+  <div id="end_screen" class="hidden">
+    <img src="./start_screen/end_screen-03.png" height = '900px' width="1600">
+    <button>
+      <img src="./start_screen/home-03.png" height = '160px' width="160">
+    </button>
+    <button class="reload">
+      <img src="./start_screen/reload-03.png" alt="buttonpng" height = '160px' width="160">
+    </button>
+  </div>
  
 
   <div id="highScore" class="hidden"></div>
@@ -167,6 +176,40 @@
     width: 80px;
   }
   
+  #end_screen{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+  }
+
+  #endscreen reload {
+    position: fixed;
+    top: 20px;
+    right: 140px;
+    cursor: pointer;
+    border: none;
+    background-color: inherit;
+    display: flex;
+    height: 80px;
+    width: 80px;
+  }
+    reload:hover {
+            transform: rotate(360deg);}
+  
+  #endscreen home {
+    position: fixed;
+    top: 20px;
+    right: 140px;
+    cursor: pointer;
+    border: none;
+    background-color: inherit;
+    display: flex;
+    height: 80px;
+    width: 80px;
+  }
 </style>
 
 </html>
