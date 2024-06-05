@@ -79,6 +79,7 @@ export function process_score (scene)
         
     });
 
+    
 
     // Bắt đầu game khi nhấn vào nút hoặc sự kiện khác
     //document.querySelector('button01').addEventListener('click', startGame);
