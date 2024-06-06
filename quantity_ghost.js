@@ -2,7 +2,6 @@ import * as THREE from 'three';
 
 export function quantity_ghost(scene)
 {
-    let ghostCount;
     function createGhostElement(scene) {
         // Khởi tạo canvas và context để vẽ điểm số và điểm số cao
         const canvas = document.createElement('canvas');
