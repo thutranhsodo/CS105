@@ -9,7 +9,6 @@ import * as land_ from './land.js';
 import * as vatpham_ from './vatpham.js'
 import { music } from './music.js';
 document.addEventListener('DOMContentLoaded', async function () {
-
   let landSet = [], ghosts = [], oldghosts = [], vatpham = [], movementSpeed = 0.03, flag = 1, disappearTime, ghostspecialActive = false, speed_j=0.06;
   const boostedSpeed = 0.1; // Temporary speed boost
   let isBoosted = false;
@@ -67,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       vatpham_.animation_vatpham(vatpham,movementSpeed);
 
       checkCollision();
-      //ghost_fall();
+      ghost_fall();
       if (ghostspecialActive!=true) oneJump(0.8,-0.78,-0.65, -0.75);
       else oneJump(1.5,-0.4, -0.2, -0.4)
       updateGhostCountDisplay(ghosts.length);
@@ -416,19 +415,22 @@ document.addEventListener('DOMContentLoaded', async function () {
     const ghost_right = ghost.position.x + ghost.scale.x/2;
     const ghost_down = ghost.position.y - ghost.scale.y/2;
     const land0_right = landSet[0].position.x +landSet[0].scale.x/2;
-    const land1_left = landSet[1].position.x-landSet[1].scale.x/2;
-    if (ghost_left>land0_right && ghost_right<land1_left && ghost_down <-0.85)
+    const land1_left = landSet[1].position.x - landSet[1].scale.x / 2;
+    const land_height = landSet[0].position.y + landSet[0].scale.y / 2;
+    if (ghost_left>land0_right && ghost_right<land1_left && ghost_down <land_height)
       return true;
     return false;
   }
   function ghost_fall()
   {
+    let falling_ghost = []
     for (let i=0; i<ghosts.length; i++)
-      {
-        if (!is_out_of_land(ghosts[i])) continue;
-        fall(ghosts[i])
-      }
-      
+    {
+      console.log(i,":", ghosts[i].position.y)
+      if (is_out_of_land(ghosts[i])) falling_ghost.push(ghosts[i])
+    }
+    //console.log("ghost falling", falling_ghost.length)
+    falling_ghost.forEach(fall);  
     
   }
 
