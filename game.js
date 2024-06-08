@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
           }*/
           // special ma
-          if( ghostBox.intersectsBox(itemBox) && item.name == "barrie")
+          if( ghostBox.intersectsBox(itemBox) && item.name == "barrier")
             {
               if (!ghost.isFrozen) {
                 ghost.isFrozen = true;
