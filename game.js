@@ -10,6 +10,7 @@ import * as vatpham_ from './vatpham.js'
 import { music } from './music.js';
 document.addEventListener('DOMContentLoaded', async function () {
   let landSet = [], ghosts = [], oldghosts = [], vatpham = [], movementSpeed = 0.03, flag = 1, disappearTime, ghostspecialActive = false, speed_j=0.06;
+  let timing = 0; let specialTimeout; let ghostfall = false;
   const boostedSpeed = 0.1; // Temporary speed boost
   let isBoosted = false;
   let animationFrameId;
@@ -69,6 +70,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
       checkCollision();
       ghost_fall();
+      if (!ghostspecialActive) checkandmoveGhosts();
       if (ghostspecialActive!=true) oneJump(0.8,-0.78,-0.65, -0.75);
       else oneJump(1.5,-0.4, -0.2, -0.4)
       updateGhostCountDisplay(ghosts.length);
@@ -179,11 +181,12 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
 
             //đụng vật phẩm thì ma tăng thêm
-            if (ghostspecialActive ==false && item.name =="donut") {
+            if (ghostspecialActive == false && item.name == "donut") {
+              
               const lastGhost = ghosts[ghosts.length - 1];
-              const newGhostPositionX = ghosts[0].position.x - (ghosts.length * 0.3);
-              const newGhostPositionY = ghosts[0].position.y;
-              const newGhostPositionZ = ghosts[0].position.z;
+              const newGhostPositionX = lastGhost.position.x - 0.3;
+              const newGhostPositionY = lastGhost.position.y;
+              const newGhostPositionZ = lastGhost.position.z;
 
                 // Add new ghost
                 load_ghost(scene, newGhostPositionX, newGhostPositionY, newGhostPositionZ).then(newGhost => {
@@ -196,42 +199,67 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
             // đang xử lý
             if (item.name == "donut_special") {
+              let timing = 10000;
+            
               if (!ghostspecialActive) {
                 ghostspecialActive = true;
                 oldghosts = [...ghosts];
+            
                 for (let j = 0; j < ghosts.length; j++) {
                   scene.remove(ghosts[j]);
                   ghosts.splice(j, 1);
                   j--;
-              }
-             // ghosts = [];
-              load_ghost_big(scene, -2.0, -0.4, -0.2).then(specialGhost => {
-                ghosts.push(specialGhost);
-                scene.add(specialGhost);
-                
-                setTimeout(() => {
-                  scene.remove(specialGhost);
-                  
-                  if(ghosts.length > 0 ) ghosts = oldghosts;
+                }
+            
+                load_ghost_big(scene, -2.0, -0.4, -0.2).then(specialGhost => {
+                  ghosts.push(specialGhost);
+                  scene.add(specialGhost);
+            
+                  if (specialTimeout) {
+                    clearTimeout(specialTimeout);
+                  }
+            
+                  specialTimeout = setTimeout(() => {
+                    scene.remove(specialGhost);
+            
+                    if (ghosts.length > 0) ghosts = oldghosts;
+                    for (let k = 0; k < ghosts.length; k++) {
+                      scene.add(ghosts[k]);
+                    }
+                    ghostspecialActive = false;
+                  }, timing);
+                });
+              } else {
+                if (specialTimeout) {
+                  clearTimeout(specialTimeout);
+                }
+            
+                specialTimeout = setTimeout(() => {
+                  if (ghosts.length > 0) {
+                    const specialGhost = ghosts.pop();
+                    scene.remove(specialGhost);
+                  }
+            
+                  ghosts = oldghosts;
                   for (let k = 0; k < ghosts.length; k++) {
                     scene.add(ghosts[k]);
                   }
                   ghostspecialActive = false;
-                }, 10000);
-
-              });
+                }, timing);
+              }
             }
-          }
+            
         
-        if ( ghostBox.intersectsBox(itemBox)) {
-          if (item.name == "donut") {
-            const newGhostPositionX = ghosts[0].position.x - (oldghosts.length * 0.3);
-            const newGhostPositionY =  ghosts[0].position.y;
-            const newGhostPositionZ =  ghosts[0].position.z;
+        if ( ghostBox.intersectsBox(itemBox) && item.name == "donut" && ghostspecialActive == true)  {
+          
+            const lastGhost = oldghosts[oldghosts.length - 1];
+            const newGhostPositionX = lastGhost.position.x - 0.3;
+            const newGhostPositionY = lastGhost.position.y;
+            const newGhostPositionZ = lastGhost.position.z;
             load_ghost(scene, newGhostPositionX, newGhostPositionY, newGhostPositionZ).then(newGhost => {
               oldghosts.push(newGhost);
             });
-          }
+          
         }
       }
     
@@ -245,7 +273,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
           }*/
           // special ma
-          if( ghostBox.intersectsBox(itemBox) && item.name == "barrier")
+          if( ghostBox.intersectsBox(itemBox) && item.name == "barrie")
             {
               if (!ghost.isFrozen) {
                 ghost.isFrozen = true;
@@ -307,8 +335,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
   }
   
-  function animateMove(ghost, targetX, targetY, targetZ) {
-    const duration = 50;
+ /* function animateMove(ghost, targetX, targetY, targetZ) {
+    const duration = 100;
     const startTime = Date.now();
     const startX = ghost.position.x;
     const startY = ghost.position.y;
@@ -331,46 +359,39 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
   
     animate();
-  }
-
-  /*function boostGhostSpeed() {
-    if (!isBoosted) {
-      isBoosted = true;
-      const acceleration = 0.0005; // Gradual acceleration
-      let currentSpeed = movementSpeed;
-  
-      const interval = setInterval(() => {
-        let gapFilled = true;
-        for (let i = 1; i < ghosts.length; i++) {
-          const previousGhost = ghosts[i - 1];
-          const currentGhost = ghosts[i];
-          const distance = previousGhost.position.x - currentGhost.position.x;
-  
-          if (distance > 0.3) {
-            currentGhost.position.x += currentSpeed; // Increase position to fill the gap
-            gapFilled = false;
-          }
+  }*/
+  function animateMove(ghost, targetX, targetY, targetZ) {
+      const duration = 50
+      const startTime = Date.now();
+      const startX = ghost.position.x;
+      const startY = ghost.position.y;
+      const startZ = ghost.position.z;
+      const deltaX = targetX - startX;
+      const deltaY = targetY - startY;
+      const deltaZ = targetZ - startZ;
+    
+      // Ease-in-out function for smoother animation
+      function easeInOutQuad(t) {
+        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+      }
+    
+      function animate() {
+        const elapsedTime = Date.now() - startTime;
+        const progress = Math.min(elapsedTime / duration, 1);
+        const easedProgress = easeInOutQuad(progress);
+    
+        ghost.position.x = startX + deltaX * easedProgress;
+        ghost.position.y = startY + deltaY * easedProgress;
+        ghost.position.z = startZ + deltaZ * easedProgress;
+    
+        if (progress < 1) {
+          requestAnimationFrame(animate);
         }
-  
-        if (gapFilled) {
-          clearInterval(interval);
-          isBoosted = false;
-        } else {
-          currentSpeed += acceleration; // Gradually increase the speed
-        }
-      }, 555); // Run every frame (16ms for 60fps)
+      }
+    
+      animate();
     }
-  }*/
-
- /* function boostGhostSpeed() {
-    isBoosted = true;
-    movementSpeed = boostedSpeed;
-    setTimeout(() => {
-      movementSpeed = 0.03;
-      isBoosted = false;
-    }, 1000);
-  }*/
-
+    
   // ma nhảy  
   function oneJump(maxheight1, minheight1, maxheight2, minheight2) {
     document.addEventListener('keydown', function (event) {
@@ -393,7 +414,6 @@ document.addEventListener('DOMContentLoaded', async function () {
   function fall(ghost) {
     // Fixed initial velocity and gravity
     const fixedTime = 2;
-
     function animate() {
       let elapsedTime = (Date.now() - startTime) / 1000;
       if (elapsedTime > fixedTime) elapsedTime = fixedTime;
@@ -409,8 +429,20 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     let startTime = Date.now();
     requestAnimationFrame(animate);
+    //moveGhostsForward(0);
   }
 
+  function checkandmoveGhosts()
+  {
+    for (let i = 0; i < ghosts.length; i++)
+    {
+      if (ghosts[i].position.y == -0.8 && ghosts[i + 1] && ghosts[i + 1].position.y == -0.8 && ghosts[i].position.x - 0.3 != ghosts[i + 1].position.x) {
+        moveGhostsForward(i + 1);
+        break;
+      }
+    }
+    
+  }
   function is_out_of_land(ghost)
   {
     const ghost_left = ghost.position.x - ghost.scale.x/2;
@@ -429,11 +461,18 @@ document.addEventListener('DOMContentLoaded', async function () {
     for (let i=0; i<ghosts.length; i++)
     {
       console.log(i,":", ghosts[i].position.y)
-      if (is_out_of_land(ghosts[i])) falling_ghost.push(ghosts[i])
+      if (is_out_of_land(ghosts[i])) {
+        falling_ghost.push(ghosts[i])
+        //ghostfall = true;
+      }
     }
     //console.log("ghost falling", falling_ghost.length)
     falling_ghost.forEach(fall);  
-    
+    /*if (ghostfall == true && ghosts.length > 1) {
+      let index = check()
+      ghostfall = false;
+      if (index != -1) moveGhostsForward(index);
+    }*/
   }
 
   const scene = new THREE.Scene();
