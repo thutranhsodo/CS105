@@ -30,8 +30,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     
     async function update() {
       if (isgameover) 
-        { quantity_ghost(scene);
-          return;}
+          return;
 
       renderer.render(scene, camera);
       if (landSet[landSet.length-1].position.x < 8)
@@ -81,8 +80,8 @@ document.addEventListener('DOMContentLoaded', async function () {
       animationFrameId = requestAnimationFrame(update);
       
     }
-    updateGhostCountDisplay();
     update();
+    updateGhostCountDisplay(ghosts.length);
   }
   
   //load_donut lẻ
@@ -189,8 +188,6 @@ document.addEventListener('DOMContentLoaded', async function () {
                 load_ghost(scene, newGhostPositionX, newGhostPositionY, newGhostPositionZ).then(newGhost => {
                   ghosts.push(newGhost);
                   scene.add(newGhost);
-                 // ghostCount = ghosts.length;
-                 // updateGhostCountDisplay(ghostCount);
                 });
               
             }
@@ -545,14 +542,29 @@ document.addEventListener('DOMContentLoaded', async function () {
   });
 
   const container = document.querySelector('.background-container');
-  const buttonStart = document.querySelector('.button01, .restart');
+  const buttonStart = document.querySelector('.button01, .reload');
   const buttonInstruction = document.querySelector('.button02');
   const closeInstructionButton = document.getElementById('close-instruction');
   const buttonMusic = document.querySelector('.button03');
   const turnoffMusic = document.getElementById('turn-off-music');
-  const buttonHome = document.querySelector('.home');
+  const buttonHome = document.getElementById('home');
+  const buttonReload = document.getElementById('reload');
 
   buttonStart.addEventListener('click', async function () {
+    console.log("Button Start clicked!");
+    container.parentNode.removeChild(container);
+    try {
+      sound.pause();
+      await start_game();
+      console.log("Game started!");
+    } catch (error) {
+      console.error("Error:", error);
+    }
+    process_score(scene);
+    music(scene, camera);
+  });
+
+  buttonReload.addEventListener('click', async function () {
     console.log("Button Start clicked!");
     container.parentNode.removeChild(container);
     try {

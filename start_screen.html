@@ -26,7 +26,7 @@
     <img src="./start_screen/instruction-02.png"  alt="your-image" id="imageToShow">  
 
     <button id="close-instruction" class="hidden">
-      <img src="./start_screen/shut_down-03.png" alt="buttonpng"height="80px" width="80px">
+      <img src="./start_screen/shut_down-03.png" alt="buttonpng" height="80px" width="80px">
     </button>
   </div>
 
@@ -37,12 +37,12 @@
   </div>
 
   <div id="end_screen" class="hidden">
-    <img src="./start_screen/end_screen-03.png" height = "900px" width="1600px">
+    <img src="./start_screen/end_screen-03.png" id="img_end"height = "900px" width="1600px">
     <button id="home" class="hidden">
-      <img src="./start_screen/home-03.png" alt="buttonpng" height="80px" width="80px">
+      <img src="./start_screen/home-03.png" alt="buttonpng" height="80" width="80">
     </button>
     <button id="reload" class="hidden">
-      <img src="./start_screen/reload-03.png" alt="buttonpng" height="80px" width="80px">
+      <img src="./start_screen/reload-03.png" alt="buttonpng" height="80" width="80">
     </button>
   </div>
  
@@ -198,31 +198,30 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    justify-content: center; 
+    align-items: center;
     display: none;
   } 
-    #end_screen img{
-      width: 100%;
-      height: 100%;
+    #img_end{
+      width: 75%;
+      height: 75%;
       object-fit: cover; 
       margin: 0; 
     } 
+
     #end_screen button {
       position: fixed;
       cursor: pointer;
       border: none;
       background-color: inherit;
-      height:"80px";
-      width:"80px";
     }
     #reload{
-      right: 910px;
-      top: 200px;
+      right: 450px;
+      top: 400px;
     }
     #home{
-      left: 910px;
-      top: 200px;
+      left: 450px;
+      top: 400px;
     }
 
 </style>
