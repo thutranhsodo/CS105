@@ -8,8 +8,6 @@ export function process_score (scene)
         const context = canvas.getContext('2d');
         canvas.width = 600; //càng to thì càng nhỏ
         canvas.height = 500;
-        // context.fillStyle = '#000000'; // Màu nền (đen)
-        // context.fillRect(0, 0, canvas.width, canvas.height);
         context.font = 'Bold 40px Arial';//px: độ rõ/mờ của chữ
         context.fillStyle = 'white';
         context.fillText('Score: 0', 10, 30);
@@ -35,7 +33,7 @@ export function process_score (scene)
     let score = 0;
     let intervalId = null; // Biến này để lưu ID của setInterval để có thể dừng nó sau này
 
-    const highScoreKey = 'highScore';
+    const highScoreKey = document.getElementById('highScore');
 
     function startGame() {
         score = 0; // Reset điểm khi bắt đầu game
@@ -43,9 +41,10 @@ export function process_score (scene)
         intervalId = setInterval(incrementScore, 1000); // Bắt đầu tính điểm sau mỗi giây
     }
 
-    function endGame() {
+    window.endGame = function() {
         clearInterval(intervalId); // Dừng tính điểm khi game kết thúc
         checkHighScore(); // Kiểm tra điểm cao
+        return score;
     }
 
     function incrementScore() {
@@ -63,28 +62,10 @@ export function process_score (scene)
         const highScore = localStorage.getItem(highScoreKey) || 0;
         if (score > highScore) {
             localStorage.setItem(highScoreKey, score);
-            updateHighScoreDisplay();
         }
+        //highScoreKey.textContent = `High Score: ${highScore}`;
     }
 
-    function updateHighScoreDisplay() {
-        const highScore = localStorage.getItem(highScoreKey) || 0;
-        const highScoreElement = document.getElementById('highScore');
-        highScoreElement.textContent = `High Score: ${highScore}`;
-    }
     startGame();
-    document.addEventListener('DOMContentLoaded', (event) => {
-        createScoreElement();
-        updateHighScoreDisplay();
-        
-    });
-
-    
-
-    // Bắt đầu game khi nhấn vào nút hoặc sự kiện khác
-    //document.querySelector('button01').addEventListener('click', startGame);
-
-    // Kết thúc game khi cần
-    // Ví dụ: Khi người chơi chết hoặc kết thúc level
-    // Đặt hàm endGame() ở đây
+    checkHighScore();
 }

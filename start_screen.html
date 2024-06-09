@@ -22,6 +22,8 @@
     <img src="./start_screen/music-03.png" alt="buttonpng"height="130px" width="130px">
   </button>
 
+  <div id="highScore">High Score: 0 </div>
+
   <div id="instruction" class="hidden">
     <img src="./start_screen/instruction-02.png"  alt="your-image" id="imageToShow">  
 
@@ -36,21 +38,6 @@
     </button>
   </div>
 
-  <div id="end_screen" class="hidden">
-    <img src="./start_screen/end_screen-03.png" id="img_end"height = "900px" width="1600px">
-    <button id="home" class="hidden">
-      <img src="./start_screen/home-03.png" alt="buttonpng" height="80" width="80">
-    </button>
-    <button id="reload" class="hidden">
-      <img src="./start_screen/reload-03.png" alt="buttonpng" height="80" width="80">
-    </button>
-  </div>
- 
-
-  <div id="highScore" class="hidden"></div>
-  <!--<div class="game">-->
-    <!--<div id="score">Score: 0</div>-->
-    
   </div> 
   
   <script type="importmap">
@@ -64,6 +51,8 @@
   <script src="./node_modules/cannon/build/cannon.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.js"></script>
   <script type="module" src="./game.js"></script>
+  <script type="module" src="./process_score.js"></script>
+  <script type="module" src="./end_screen.js"></script>
  
 </body>
 <style>
@@ -144,13 +133,14 @@
     opacity: 0; /* Hide overlay on container hidden class */
     display: none;
    }
-   .score {
+   #highScore {
   position: absolute;
-  color: white;
-  font-size: 3em;
+  color: Black;
+  font-size: 2em;
   font-weight: bold;
-  top: 30px;
-  right: 30px;
+  bottom: 30px;
+  left: 500px;
+  display: none;
 }
 
 #instruction {
@@ -191,37 +181,6 @@
       background-color: inherit;
       left: 910px;
       top: 200px;
-    }
-  
-  
-  #end_screen{
-    position: fixed;
-    top: 0;
-    left: 0;
-    justify-content: center; 
-    align-items: center;
-    display: none;
-  } 
-    #img_end{
-      width: 75%;
-      height: 75%;
-      object-fit: cover; 
-      margin: 0; 
-    } 
-
-    #end_screen button {
-      position: fixed;
-      cursor: pointer;
-      border: none;
-      background-color: inherit;
-    }
-    #reload{
-      right: 450px;
-      top: 400px;
-    }
-    #home{
-      left: 450px;
-      top: 400px;
     }
 
 </style>

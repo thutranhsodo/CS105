@@ -8,14 +8,16 @@ import { quantity_ghost } from './quantity_ghost.js';
 import * as land_ from './land.js';
 import * as vatpham_ from './vatpham.js'
 import { music } from './music.js';
-document.addEventListener('DOMContentLoaded', async function () {
+import { end_screen } from './end_screen.js';
+window.loadContent = async function() {
   let landSet = [], ghosts = [], oldghosts = [], vatpham = [], movementSpeed = 0.03, flag = 1, disappearTime, ghostspecialActive = false, speed_j=0.06;
   let timing = 0; let specialTimeout; let ghostfall = false;
   const boostedSpeed = 0.1; // Temporary speed boost
   let isBoosted = false;
   let animationFrameId;
   let isgameover = false;
-  async function start_game() {
+  window.start_game = async function () {
+    //process_score(scene);
     landSet = land_.land_random(scene,-2)
     let inghost = await load_ghost(scene, -2.0, -0.82, -0.2);
     ghosts.push(inghost);
@@ -30,8 +32,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     //vatpham = await vatpham_.load_vatpham_random(scene,landSet);
     
     async function update() {
-      if (isgameover) 
-          return;
+      if (isgameover) {
+        end_screen();
+        return;
+      }
 
       renderer.render(scene, camera);
       if (landSet[landSet.length-1].position.x < 8)
@@ -581,29 +585,13 @@ document.addEventListener('DOMContentLoaded', async function () {
   });
 
   const container = document.querySelector('.background-container');
-  const buttonStart = document.querySelector('.button01, .reload');
+  const buttonStart = document.querySelector('.button01');
   const buttonInstruction = document.querySelector('.button02');
   const closeInstructionButton = document.getElementById('close-instruction');
   const buttonMusic = document.querySelector('.button03');
   const turnoffMusic = document.getElementById('turn-off-music');
-  const buttonHome = document.getElementById('home');
-  const buttonReload = document.getElementById('reload');
 
   buttonStart.addEventListener('click', async function () {
-    console.log("Button Start clicked!");
-    container.parentNode.removeChild(container);
-    try {
-      sound.pause();
-      await start_game();
-      console.log("Game started!");
-    } catch (error) {
-      console.error("Error:", error);
-    }
-    process_score(scene);
-    music(scene, camera);
-  });
-
-  buttonReload.addEventListener('click', async function () {
     console.log("Button Start clicked!");
     container.parentNode.removeChild(container);
     try {
@@ -632,17 +620,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     const imageMusic = document.getElementById('music');
     imageMusic.style.display = 'block';
     sound.pause();
-  })
+  });
   turnoffMusic.addEventListener('click', function(){
     const MusicContainer = document.getElementById('music');
     MusicContainer.style.display = 'none';
     sound.play();
   });
-
-  buttonHome.addEventListener('click', function(){
-    const end_screen = document.getElementById('end_screen');
-    end_screen.style.display = 'none';
-    const Container = document.getElementById('background-container');
-    Container.style.display = 'none';
-  });
-});
+}
+document.addEventListener('DOMContentLoaded', loadContent);

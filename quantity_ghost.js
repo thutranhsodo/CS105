@@ -8,8 +8,6 @@ export function quantity_ghost(scene)
         const context = canvas.getContext('2d');
         canvas.width = 600; //càng to thì càng nhỏ
         canvas.height = 500;
-        // context.fillStyle = '#000000'; // Màu nền (đen)
-        // context.fillRect(0, 0, canvas.width, canvas.height);
         context.font = 'Bold 40px Arial';//px: độ rõ/mờ của chữ
         context.fillStyle = 'white';
     
