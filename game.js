@@ -19,11 +19,11 @@ window.loadContent = async function() {
   window.start_game = async function () {
     //process_score(scene);
     landSet = land_.land_random(scene,-2)
-    let inghost = await load_ghost(scene, -2.0, -0.82, -0.2);
+    let inghost = await load_ghost(scene, -2.0, -0.735, -0.2);
     ghosts.push(inghost);
     scene.add(inghost);
  
-    let ing = await load_ghost(scene, -2.3, -0.82, -0.2);
+    let ing = await load_ghost(scene, -2.3, -0.735, -0.2);
     ghosts.push(ing);
     scene.add(ing);
     
@@ -73,15 +73,15 @@ window.loadContent = async function() {
 
       checkCollision();
       ghost_fall();
-      if (ghostspecialActive!=true) oneJump(0.8,-0.78,-0.65, -0.75,15);
-      else oneJump(1.5,-0.4, -0.2, -0.4,15)
+      if (ghostspecialActive!=true) oneJump(0.8,-0.735,-0.65, -0.735,15);
+      else oneJump(1.5,-0.3, -0.2, -0.3, 15)
       updateGhostCountDisplay(ghosts.length);
       if ((ghosts.length == 0 && ghostspecialActive != true) || (ghostspecialActive == true && ghost_block ==true) )
       {
         
         setTimeout(function() {
           isgameover = true;
-        }, 3000);
+        }, 2000);
       }
       //check();
       controls.update();
