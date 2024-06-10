@@ -39,13 +39,14 @@ export function land_random(scene, model_position_x)
 
   for (let i = 0; i < 8; i++) {
       var model_scale_x = Math.random() * (10 - 1) + 1;
-      var distance = Math.random() * (3- 1) +0.7
+      var distance = Math.random() * (3- 1) +0.5
       model_position_x+=model_scale_x/2+distance;
       let land = load_land(scene, model_scale_x, model_position_x );
       land_set.push(land)
       scene.add(land)
       model_position_x+=model_scale_x/2;
     }
+    model_position_x+=0.5
     return land_set
 }
 

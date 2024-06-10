@@ -40,7 +40,7 @@ window.loadContent = async function() {
       renderer.render(scene, camera);
       if (landSet[landSet.length-1].position.x < 8)
         {
-          let land_tam =land_.land_random(scene, landSet[landSet.length-1].position.x + landSet[landSet.length-1].scale.x/2+5)
+          let land_tam =land_.land_random(scene, landSet[landSet.length-1].position.x + landSet[landSet.length-1].scale.x/2 + 5.5)
           let vatpham_tam =await vatpham_.load_vatpham_random(scene, land_tam)
           for (let i = 0; i < land_tam.length; i++) 
             {landSet.push(land_tam[i]);
@@ -73,16 +73,14 @@ window.loadContent = async function() {
 
       checkCollision();
       ghost_fall();
-      if (!ghostspecialActive) checkandmoveGhosts();
-      if (ghostspecialActive!=true) oneJump(0.8,-0.78,-0.65, -0.75);
-      else oneJump(1.5,-0.4, -0.2, -0.4)
+      if (ghostspecialActive!=true) oneJump(0.8,-0.78,-0.65, -0.75,15);
+      else oneJump(1.5,-0.4, -0.2, -0.4,15)
       updateGhostCountDisplay(ghosts.length);
       if ((ghosts.length == 0 && ghostspecialActive != true) || (ghostspecialActive == true && ghost_block ==true) )
       {
         
         setTimeout(function() {
           isgameover = true;
-          cancelAnimationFrame(animationFrameId);
         }, 3000);
       }
       //check();
@@ -172,7 +170,6 @@ window.loadContent = async function() {
           const itemBox = new THREE.Box3().setFromObject(item.object);
 
           if (ghostBox.intersectsBox(itemBox) && item.name != "barrier") {
-            console.log('Collision detected:', item);
             //vật phẩm biến mất
             scene.remove(item.object);
             vatpham.splice(j, 1);
@@ -186,6 +183,7 @@ window.loadContent = async function() {
               i--; 
               break;
             }
+          
 
             //đụng vật phẩm thì ma tăng thêm
             if (ghostspecialActive == false && item.name == "donut") {
@@ -313,8 +311,10 @@ window.loadContent = async function() {
   
       if (ghost.position.y < -10) {
         removeGhost(ghost);
-        moveGhostsForward(ghostIndex); // Move the ghosts forward after removal
+        //moveGhostsForward(ghostIndex); // Move the ghosts forward after removal
       } else {
+        speed_j=0.0001
+        oneJump(0.8,-0.78,-0.65, -0.75, ghostIndex);
         requestAnimationFrame(animate);
       }
     }
@@ -330,76 +330,9 @@ window.loadContent = async function() {
     if (index > -1) ghosts.splice(index, 1);
   }
   
-  function moveGhostsForward(startIndex) {
-    const ghostSpacing = 0.3;
-    for (let i = startIndex; i < ghosts.length; i++) {
-      const targetPositionX = -2.0 - (i * ghostSpacing);
-      const targetPositionY = ghosts[i].position.y;
-      const targetPositionZ = ghosts[i].position.z;
-  
-      animateMove(ghosts[i], targetPositionX, targetPositionY, targetPositionZ);
-    }
-  }
-  
- /* function animateMove(ghost, targetX, targetY, targetZ) {
-    const duration = 100;
-    const startTime = Date.now();
-    const startX = ghost.position.x;
-    const startY = ghost.position.y;
-    const startZ = ghost.position.z;
-    const deltaX = targetX - startX;
-    const deltaY = targetY - startY;
-    const deltaZ = targetZ - startZ;
-  
-    function animate() {
-      const elapsedTime = Date.now() - startTime;
-      const progress = Math.min(elapsedTime / duration, 1);
-  
-      ghost.position.x = startX + deltaX * progress;
-      ghost.position.y = startY + deltaY * progress;
-      ghost.position.z = startZ + deltaZ * progress;
-  
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    }
-  
-    animate();
-  }*/
-  function animateMove(ghost, targetX, targetY, targetZ) {
-      const duration = 50
-      const startTime = Date.now();
-      const startX = ghost.position.x;
-      const startY = ghost.position.y;
-      const startZ = ghost.position.z;
-      const deltaX = targetX - startX;
-      const deltaY = targetY - startY;
-      const deltaZ = targetZ - startZ;
-    
-      // Ease-in-out function for smoother animation
-      function easeInOutQuad(t) {
-        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-      }
-    
-      function animate() {
-        const elapsedTime = Date.now() - startTime;
-        const progress = Math.min(elapsedTime / duration, 1);
-        const easedProgress = easeInOutQuad(progress);
-    
-        ghost.position.x = startX + deltaX * easedProgress;
-        ghost.position.y = startY + deltaY * easedProgress;
-        ghost.position.z = startZ + deltaZ * easedProgress;
-    
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        }
-      }
-    
-      animate();
-    }
-    
+
   // ma nhảy  
-  function oneJump(maxheight1, minheight1, maxheight2, minheight2) {
+  function oneJump(maxheight1, minheight1, maxheight2, minheight2, ghostIndex) {
     document.addEventListener('keydown', function (event) {
       if (event.keyCode === 32 && !isJumping) {
         isJumping = true;
@@ -407,13 +340,24 @@ window.loadContent = async function() {
       }
     });
     for (let i = 0; i < ghosts.length; i++) {
-      if (isJumping)
-          {
-            animation_ghost(ghosts[i], maxheight1 , minheight1, speed_j)
-            if (flag==1) speed_j=Math.max(0.025, speed_j-0.003)
-            else speed_j+=0.0002
-          }
-      if (!isJumping) animation_ghost(ghosts[i], maxheight2, minheight2, 0.005);
+      if (!ghosts[i].isRemoving)
+        {
+          if (i > ghostIndex)
+            {
+              const targetPositionX = -2.0 - ((i-1) * 0.3);
+              if (ghosts[i].position.x <targetPositionX ) 
+                ghosts[i].position.x+=0.005
+            }
+          
+          if (is_out_of_land(ghosts[i], landSet)) fall(ghosts[i])
+          if (isJumping)
+            {
+              animation_ghost(ghosts[i], maxheight1 , minheight1, speed_j)
+              if (flag==1) speed_j=Math.max(0.025, speed_j-0.003)
+              else speed_j+=0.0002
+            }
+          if (!isJumping) animation_ghost(ghosts[i], maxheight2, minheight2, 0.005);
+        }     
   }
   }
 
@@ -435,50 +379,35 @@ window.loadContent = async function() {
 
     let startTime = Date.now();
     requestAnimationFrame(animate);
-    //moveGhostsForward(0);
   }
 
-  function checkandmoveGhosts()
+  function is_out_of_land(ghost, landSet) 
   {
-    for (let i = 0; i < ghosts.length; i++)
-    {
-      if (ghosts[i].position.y == -0.8 && ghosts[i + 1] && ghosts[i + 1].position.y == -0.8 && ghosts[i].position.x - 0.3 != ghosts[i + 1].position.x) {
-        moveGhostsForward(i + 1);
-        break;
-      }
-    }
-    
-  }
-  function is_out_of_land(ghost)
-  {
+    if (isJumping || ghostspecialActive) return false;
     const ghost_left = ghost.position.x - ghost.scale.x/2;
     const ghost_right = ghost.position.x + ghost.scale.x/2;
-    const ghost_down = ghost.position.y - ghost.scale.y/2;
-    const land0_right = landSet[0].position.x +landSet[0].scale.x/2;
-    const land1_left = landSet[1].position.x - landSet[1].scale.x / 2;
-    const land_height = landSet[0].position.y + landSet[0].scale.y / 2;
-    if (ghost_left>land0_right && ghost_right<land1_left && ghost_down <land_height)
-      return true;
-    return false;
+    for (let j=0; j<3; j++)
+      {
+        const land_right = landSet[j].position.x +landSet[j].scale.x/2;
+        const land_left = landSet[j].position.x - landSet[j].scale.x/2;
+        if ((ghost_left>land_left && ghost_right<land_right))
+          {
+          return false;
+          }
+      }
+    
+    return true;
   }
   function ghost_fall()
   {
     let falling_ghost = []
     for (let i=0; i<ghosts.length; i++)
     {
-      console.log(i,":", ghosts[i].position.y)
-      if (is_out_of_land(ghosts[i])) {
+      if (is_out_of_land(ghosts[i], landSet)) {
         falling_ghost.push(ghosts[i])
-        //ghostfall = true;
       }
     }
-    //console.log("ghost falling", falling_ghost.length)
     falling_ghost.forEach(fall);  
-    /*if (ghostfall == true && ghosts.length > 1) {
-      let index = check()
-      ghostfall = false;
-      if (index != -1) moveGhostsForward(index);
-    }*/
   }
 
   const scene = new THREE.Scene();
