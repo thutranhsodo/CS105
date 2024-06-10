@@ -11,7 +11,7 @@ import { music } from './music.js';
 import { end_screen } from './end_screen.js';
 window.loadContent = async function() {
   let landSet = [], ghosts = [], oldghosts = [], vatpham = [], movementSpeed = 0.03, flag = 1, disappearTime, ghostspecialActive = false, speed_j=0.06;
-  let timing = 0; let specialTimeout; let ghostfall = false;
+  let timing = 0; let specialTimeout; let ghostfall = false; let ghost_block=false;
   const boostedSpeed = 0.1; // Temporary speed boost
   let isBoosted = false;
   let animationFrameId;
@@ -77,9 +77,13 @@ window.loadContent = async function() {
       if (ghostspecialActive!=true) oneJump(0.8,-0.78,-0.65, -0.75);
       else oneJump(1.5,-0.4, -0.2, -0.4)
       updateGhostCountDisplay(ghosts.length);
-      if ((ghosts.length == 0 && ghostspecialActive != true)) {
-        isgameover = true;
-        cancelAnimationFrame(animationFrameId);
+      if ((ghosts.length == 0 && ghostspecialActive != true) || (ghostspecialActive == true && ghost_block ==true) )
+      {
+        
+        setTimeout(function() {
+          isgameover = true;
+          cancelAnimationFrame(animationFrameId);
+        }, 3000);
       }
       //check();
       controls.update();
@@ -278,6 +282,7 @@ window.loadContent = async function() {
             {
               if (!ghost.isFrozen) {
                 ghost.isFrozen = true;
+                ghost_block = true;
                 ghost.position.x = itemBox.min.x - 0.1;
                 setTimeout(() => {
                   removeGhost(ghost);
