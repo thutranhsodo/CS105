@@ -56,7 +56,7 @@ export function animation_land(landSet, movementSpeed) {
     for (let i = 0; i < landSet.length; i++) {
       if (landSet[i] ) {
         landSet[i].position.x -= movementSpeed;
-        movementSpeed +=0.00001
+
       }
     }
   }

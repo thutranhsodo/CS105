@@ -70,6 +70,7 @@ window.loadContent = async function() {
         }
       }
       vatpham_.animation_vatpham(vatpham,movementSpeed);
+      movementSpeed +=0.000005
 
       checkCollision();
       ghost_fall();
@@ -407,7 +408,12 @@ window.loadContent = async function() {
         falling_ghost.push(ghosts[i])
       }
     }
-    falling_ghost.forEach(fall);  
+    falling_ghost.forEach(fall);
+        for (let i = 0; i < ghosts.length; i++) {  
+          const targetPositionX = -2.0 - ((i) * 0.3);
+                  if (ghosts[i].position.x <targetPositionX ) 
+                    ghosts[i].position.x+=0.005}
+    
   }
 
   const scene = new THREE.Scene();
